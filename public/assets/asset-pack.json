@@ -1,0 +1,24 @@
+{
+  "gameplayScreen": [
+    {
+      "type": "image",
+      "key": "bg_gameplay_screen",
+      "url": "/assets/gameplayScreen/bg_gameplay_screen.png",
+      "overwrite": false
+    },
+    {
+      "type": "spritesheet",
+      "key": "sprite_player",
+      "url": "/assets/gameplayScreen/sprites/sprite_player.png",
+      "frameWidth": 102,
+      "frameHeight": 102,
+      "frameMax": 10
+    }
+  ],
+
+  "meta": {
+    "app": "Phaser ES6 Starter",
+    "url": "",
+    "version": "0.0.1-alpha.1"
+  }
+}

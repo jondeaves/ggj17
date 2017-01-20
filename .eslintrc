@@ -1,0 +1,11 @@
+{
+  "extends": "airbnb",
+  "globals": {
+    "Phaser": true,
+    "io": true,
+    "sessionStorage": true
+  },
+  "rules": {
+    'max-len': [2, 120, 4]
+  }
+}

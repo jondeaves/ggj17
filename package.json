@@ -1,0 +1,42 @@
+{
+  "name": "phaser-es6",
+  "version": "1.0.0-alpha.1",
+  "description": "A starter project for building games in ES6 using PhaserJS",
+  "scripts": {
+    "build": "webpack --progress --colors",
+    "dev": "webpack --progress --colors --watch",
+    "start": "./node_modules/.bin/http-server ./public -p 8080"
+  },
+  "author": "Jon Deaves <hello@jondeaves.me>",
+  "contributors": [
+    "Jon Deaves <hello@jondeaves.me>"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/jondeaves/phaser-es6",
+  "dependencies": {
+    "express": "^4.14.0",
+    "http-errors": "^1.5.1",
+    "lodash": "^4.16.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.5.1",
+    "babel-core": "^6.17.0",
+    "babel-eslint": "^7.0.0",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.16.0",
+    "css-loader": "^0.26.1",
+    "eslint": "^3.13.1",
+    "eslint-config-airbnb": "^14.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^3.0.2",
+    "eslint-plugin-react": "^6.9.0",
+    "http-server": "^0.9.0",
+    "node-sass": "^4.2.0",
+    "phaser": "^2.6.2",
+    "postcss-loader": "^1.0.0",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.2"
+  }
+}

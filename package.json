@@ -1,7 +1,7 @@
 {
-  "name": "phaser-es6",
+  "name": "got-crabs",
   "version": "1.0.0-alpha.1",
-  "description": "A starter project for building games in ES6 using PhaserJS",
+  "description": "Global game jam 2017 entry",
   "scripts": {
     "build": "webpack --progress --colors",
     "dev": "webpack --progress --colors --watch",

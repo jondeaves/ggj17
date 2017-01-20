@@ -64,7 +64,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
+	  value: true
 	});
 	
 	var _BootState = __webpack_require__(2);
@@ -74,6 +74,10 @@
 	var _LoadingState = __webpack_require__(3);
 	
 	var _LoadingState2 = _interopRequireDefault(_LoadingState);
+	
+	var _SplashState = __webpack_require__(13);
+	
+	var _SplashState2 = _interopRequireDefault(_SplashState);
 	
 	var _GamePlayState = __webpack_require__(4);
 	
@@ -92,24 +96,25 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var Game = function (_Phaser$Game) {
-	    _inherits(Game, _Phaser$Game);
+	  _inherits(Game, _Phaser$Game);
 	
-	    function Game() {
-	        _classCallCheck(this, Game);
+	  function Game() {
+	    _classCallCheck(this, Game);
 	
-	        var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, _constants2.default.world.width, _constants2.default.world.height, Phaser.CANVAS, 'game_canvas', null));
+	    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, _constants2.default.world.width, _constants2.default.world.height, Phaser.CANVAS, 'game_canvas', null));
 	
-	        _this.state.add('BootState', _BootState2.default, false);
-	        _this.state.add('LoadingState', _LoadingState2.default);
-	        _this.state.add('GamePlayState', _GamePlayState2.default);
+	    _this.state.add('BootState', _BootState2.default, false);
+	    _this.state.add('LoadingState', _LoadingState2.default);
+	    _this.state.add('SplashState', _SplashState2.default);
+	    _this.state.add('GamePlayState', _GamePlayState2.default);
 	
-	        _this.state.start('BootState', true, false);
+	    _this.state.start('BootState', true, false);
 	
-	        _this.constants = _constants2.default;
-	        return _this;
-	    }
+	    _this.constants = _constants2.default;
+	    return _this;
+	  }
 	
-	    return Game;
+	  return Game;
 	}(Phaser.Game);
 	
 	exports.default = Game;
@@ -211,6 +216,7 @@
 	      this.game.load.onLoadComplete.add(this.loadComplete, this);
 	
 	      // Begin the load
+	      this.game.load.pack('splashScreen', '/assets/asset-pack.json', null, this);
 	      this.game.load.pack('gameplayScreen', '/assets/asset-pack.json', null, this);
 	
 	      this.game.load.start();
@@ -229,7 +235,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      this.state.start('GamePlayState', true, false);
+	      this.state.start('SplashState', true, false);
+	      // this.state.start('GamePlayState', true, false);
 	    }
 	  }]);
 	
@@ -254,9 +261,9 @@
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _Player = __webpack_require__(7);
+	var _HordeController = __webpack_require__(14);
 	
-	var _Player2 = _interopRequireDefault(_Player);
+	var _HordeController2 = _interopRequireDefault(_HordeController);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -288,18 +295,28 @@
 	  }, {
 	    key: 'generateWorld',
 	    value: function generateWorld() {
-	      this.players = this.add.group();
-	      this.players.add(new _Player2.default(this.game, 50, 50, 'sprite_player'));
+	      this.hordeControllers = this.add.group();
+	      this.hordeController = new _HordeController2.default(this.game, 50, 50, 'sprite_player');
+	      this.hordeControllers.add(this.hordeController);
+	
+	      this.game.world.setBounds(null);
+	      this.game.camera.follow(this.hordeController);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      this.game.debug.cameraInfo(this.game.camera, 32, 32);
+	      this.game.debug.spriteCoords(this.hordeController, 32, 500);
 	    }
 	  }, {
 	    key: 'update',
 	    value: function update() {
 	      this.updateTimer();
 	
-	      // Updates related to player
-	      this.players.forEach(function (player) {
-	        // Updates on the player object
-	        player.update();
+	      // Updates related to hordes
+	      this.hordeControllers.forEach(function (hordeController) {
+	        // Updates on the horde object
+	        hordeController.update();
 	      });
 	    }
 	  }, {
@@ -17425,74 +17442,7 @@
 
 
 /***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Player = function (_Phaser$Sprite) {
-	  _inherits(Player, _Phaser$Sprite);
-	
-	  function Player(game, x, y, asset) {
-	    _classCallCheck(this, Player);
-	
-	    // Phaser data
-	    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, x, y, asset, 5));
-	
-	    _this.game = game;
-	    _this.anchor.setTo(0.5);
-	    _this.moveSpeed = 5;
-	
-	    // Setup animation
-	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-	    _this.play('right');
-	
-	    // Add input keys
-	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
-	    return _this;
-	  }
-	
-	  _createClass(Player, [{
-	    key: 'update',
-	    value: function update() {
-	      this.updateInput();
-	    }
-	  }, {
-	    key: 'updateInput',
-	    value: function updateInput() {
-	      if (this.cursors.left.isDown) {
-	        this.x -= this.moveSpeed;
-	      } else if (this.cursors.right.isDown) {
-	        this.x += this.moveSpeed;
-	      }
-	
-	      if (this.cursors.up.isDown) {
-	        this.y -= this.moveSpeed;
-	      } else if (this.cursors.down.isDown) {
-	        this.y += this.moveSpeed;
-	      }
-	    }
-	  }]);
-	
-	  return Player;
-	}(Phaser.Sprite);
-	
-	exports.default = Player;
-
-/***/ },
+/* 7 */,
 /* 8 */
 /***/ function(module, exports) {
 
@@ -17546,7 +17496,7 @@
 	
 	
 	// module
-	exports.push([module.id, "html img,\nbody img {\n  max-width: 100%; }\n\nhtml {\n  box-sizing: border-box; }\n  html *,\n  html *::before,\n  html *::after {\n    box-sizing: inherit; }\n\nbody,\nh1, h2, h3, h4, h5, h6,\np, blockquote, pre,\ndl, dd, ol, ul,\nform, fieldset, legend,\nfigure,\ntable, th, td, caption,\nhr {\n  margin: 0;\n  padding: 0; }\n\nabbr[title],\ndfn[title] {\n  cursor: help; }\n\nu,\nins {\n  text-decoration: none; }\n\nins {\n  border-bottom: 1px solid; }\n\nh1, h2, h3, h4, h5, h6,\nul, ol, dl,\nblockquote, p, address,\nhr,\ntable,\nfieldset, figure,\npre {\n  margin-bottom: 1.3rem; }\n\nul, ol, dd {\n  margin-left: 1rem; }\n", "", {"version":3,"sources":["/./src/resources/scss/src/resources/scss/01-settings/_global.scss","/./src/resources/scss/src/resources/scss/03-generic/_box-sizing.scss","/./src/resources/scss/src/resources/scss/03-generic/_reset.scss","/./src/resources/scss/src/resources/scss/03-generic/_shared.scss"],"names":[],"mappings":"AACA;;EAEE,gBAAe,EAChB;;ACED;EACE,uBAAsB,EAOvB;EARD;;;IAMI,oBAAmB,EACpB;;ACRH;;;;;;;;EAQE,UAAS;EACT,WAAU,EACX;;AAKD;;EAEE,aAAY,EACb;;AAGD;;EAEE,sBAAqB,EACtB;;AAGD;EACE,yBAAwB,EACzB;;AC5BD;;;;;;;EAOE,sBAAqB,EACtB;;AAKD;EAEE,kBAAiB,EAClB","file":"main.scss","sourcesContent":["// Settings global\r\nhtml img,\r\nbody img {\r\n  max-width: 100%;\r\n}\r\n","// Box-sizing\r\n\r\n\r\n/// Set the global `box-sizing` state to `border-box`.\r\n/// css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice\r\n/// paulirish.com/2012/box-sizing-border-box-ftw\r\nhtml {\r\n  box-sizing: border-box;\r\n\r\n  *,\r\n  *::before,\r\n  *::after {\r\n    box-sizing: inherit;\r\n  }\r\n}\r\n","// Reset\r\n\r\n/// As well as using normalize.css, it is often advantageous to remove all\r\n/// margins from certain elements.\r\n// scss-lint:disable SingleLinePerSelector\r\nbody,\r\nh1, h2, h3, h4, h5, h6,\r\np, blockquote, pre,\r\ndl, dd, ol, ul,\r\nform, fieldset, legend,\r\nfigure,\r\ntable, th, td, caption,\r\nhr {\r\n  margin: 0;\r\n  padding: 0;\r\n}\r\n\r\n// scss-lint:disable QualifyingElement\r\n\r\n/// Give a help cursor to elements that give extra info on `:hover`.\r\nabbr[title],\r\ndfn[title] {\r\n  cursor: help;\r\n}\r\n\r\n/// Remove underlines from potentially troublesome elements.\r\nu,\r\nins {\r\n  text-decoration: none;\r\n}\r\n\r\n/// Apply faux underlines to inserted text via `border-bottom`.\r\nins {\r\n  border-bottom: 1px solid;\r\n}\r\n","// Shared\r\n\r\n/// Where `margin-bottom` is concerned,this value will be the same as the\r\n/// base line-height. This allows us to keep a consistent vertical rhythm.\r\n/// As per: csswizardry.com/2012/06/single-direction-margin-declarations\r\n// scss-lint:disable SingleLinePerSelector\r\nh1, h2, h3, h4, h5, h6,\r\nul, ol, dl,\r\nblockquote, p, address,\r\nhr,\r\ntable,\r\nfieldset, figure,\r\npre {\r\n  margin-bottom: 1.3rem;\r\n}\r\n\r\n\r\n/// Where `margin-left` is concerned we want to try and indent certain elements\r\n/// by a consistent amount. Define that amount once,here.\r\nul, ol, dd,\r\n%margin-left {\r\n  margin-left: 1rem;\r\n}\r\n"],"sourceRoot":"webpack://"}]);
+	exports.push([module.id, "html img,\nbody img {\n  max-width: 100%; }\n\nhtml {\n  box-sizing: border-box; }\n  html *,\n  html *::before,\n  html *::after {\n    box-sizing: inherit; }\n\nbody,\nh1, h2, h3, h4, h5, h6,\np, blockquote, pre,\ndl, dd, ol, ul,\nform, fieldset, legend,\nfigure,\ntable, th, td, caption,\nhr {\n  margin: 0;\n  padding: 0; }\n\nabbr[title],\ndfn[title] {\n  cursor: help; }\n\nu,\nins {\n  text-decoration: none; }\n\nins {\n  border-bottom: 1px solid; }\n\nh1, h2, h3, h4, h5, h6,\nul, ol, dl,\nblockquote, p, address,\nhr,\ntable,\nfieldset, figure,\npre {\n  margin-bottom: 1.3rem; }\n\nul, ol, dd {\n  margin-left: 1rem; }\n", "", {"version":3,"sources":["/./src/resources/scss/src/resources/scss/01-settings/_global.scss","/./src/resources/scss/src/resources/scss/03-generic/_box-sizing.scss","/./src/resources/scss/src/resources/scss/03-generic/_reset.scss","/./src/resources/scss/src/resources/scss/03-generic/_shared.scss"],"names":[],"mappings":"AACA;;EAEE,gBAAe,EAChB;;ACED;EACE,uBAAsB,EAOvB;EARD;;;IAMI,oBAAmB,EACpB;;ACRH;;;;;;;;EAQE,UAAS;EACT,WAAU,EACX;;AAKD;;EAEE,aAAY,EACb;;AAGD;;EAEE,sBAAqB,EACtB;;AAGD;EACE,yBAAwB,EACzB;;AC5BD;;;;;;;EAOE,sBAAqB,EACtB;;AAKD;EAEE,kBAAiB,EAClB","file":"main.scss","sourcesContent":["// Settings global\nhtml img,\nbody img {\n  max-width: 100%;\n}\n","// Box-sizing\n\n\n/// Set the global `box-sizing` state to `border-box`.\n/// css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice\n/// paulirish.com/2012/box-sizing-border-box-ftw\nhtml {\n  box-sizing: border-box;\n\n  *,\n  *::before,\n  *::after {\n    box-sizing: inherit;\n  }\n}\n","// Reset\n\n/// As well as using normalize.css, it is often advantageous to remove all\n/// margins from certain elements.\n// scss-lint:disable SingleLinePerSelector\nbody,\nh1, h2, h3, h4, h5, h6,\np, blockquote, pre,\ndl, dd, ol, ul,\nform, fieldset, legend,\nfigure,\ntable, th, td, caption,\nhr {\n  margin: 0;\n  padding: 0;\n}\n\n// scss-lint:disable QualifyingElement\n\n/// Give a help cursor to elements that give extra info on `:hover`.\nabbr[title],\ndfn[title] {\n  cursor: help;\n}\n\n/// Remove underlines from potentially troublesome elements.\nu,\nins {\n  text-decoration: none;\n}\n\n/// Apply faux underlines to inserted text via `border-bottom`.\nins {\n  border-bottom: 1px solid;\n}\n","// Shared\n\n/// Where `margin-bottom` is concerned,this value will be the same as the\n/// base line-height. This allows us to keep a consistent vertical rhythm.\n/// As per: csswizardry.com/2012/06/single-direction-margin-declarations\n// scss-lint:disable SingleLinePerSelector\nh1, h2, h3, h4, h5, h6,\nul, ol, dl,\nblockquote, p, address,\nhr,\ntable,\nfieldset, figure,\npre {\n  margin-bottom: 1.3rem;\n}\n\n\n/// Where `margin-left` is concerned we want to try and indent certain elements\n/// by a consistent amount. Define that amount once,here.\nul, ol, dd,\n%margin-left {\n  margin-left: 1rem;\n}\n"],"sourceRoot":"webpack://"}]);
 	
 	// exports
 
@@ -17858,6 +17808,181 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var SplashState = function (_Phaser$State) {
+	  _inherits(SplashState, _Phaser$State);
+	
+	  function SplashState() {
+	    _classCallCheck(this, SplashState);
+	
+	    return _possibleConstructorReturn(this, (SplashState.__proto__ || Object.getPrototypeOf(SplashState)).apply(this, arguments));
+	  }
+	
+	  _createClass(SplashState, [{
+	    key: 'init',
+	    value: function init(sessionManager) {
+	      this.sessionManager = sessionManager;
+	    }
+	  }, {
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.updateTimer();
+	
+	      if (this.totalTimeActive > 3000) {
+	        this.splashComplete();
+	      }
+	    }
+	  }, {
+	    key: 'updateTimer',
+	    value: function updateTimer() {
+	      if (typeof this.totalTimeActive === 'undefined') {
+	        this.totalTimeActive = 0;
+	      }
+	      this.totalTimeActive += this.time.elapsed;
+	    }
+	  }, {
+	    key: 'splashComplete',
+	    value: function splashComplete() {
+	      this.state.start('GamePlayState', true, false);
+	    }
+	  }]);
+	
+	  return SplashState;
+	}(Phaser.State);
+	
+	exports.default = SplashState;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var HordeController = function (_Phaser$Sprite) {
+	  _inherits(HordeController, _Phaser$Sprite);
+	
+	  function HordeController(game, x, y, asset) {
+	    _classCallCheck(this, HordeController);
+	
+	    // Phaser data
+	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, x, y, asset, 5));
+	
+	    _this.game = game;
+	    _this.anchor.setTo(0.5);
+	    _this.moveSpeed = 5;
+	
+	    // Setup animation
+	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
+	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
+	    _this.play('right');
+	
+	    // Add input keys
+	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
+	    _this.wKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.W);
+	    _this.aKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.A);
+	    _this.sKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.S);
+	    _this.dKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.D);
+	
+	    // Gamepad
+	    _this.game.input.gamepad.start();
+	    _this.gamePad = _this.game.input.gamepad.pad1;
+	    return _this;
+	  }
+	
+	  _createClass(HordeController, [{
+	    key: 'update',
+	    value: function update() {
+	      this.updateInput();
+	    }
+	  }, {
+	    key: 'updateInput',
+	    value: function updateInput() {
+	
+	      // Ensure input is captured only when within game window
+	      if (this.game.input.activePointer.withinGame) {
+	        this.game.input.enabled = true;
+	      } else {
+	        this.game.input.enabled = false;
+	      }
+	
+	      // Movement
+	      if (this.moveUp()) {
+	        this.y -= this.moveSpeed;
+	      } else if (this.moveDown()) {
+	        this.y += this.moveSpeed;
+	      }
+	
+	      if (this.moveLeft()) {
+	        this.x -= this.moveSpeed;
+	      } else if (this.moveRight()) {
+	        this.x += this.moveSpeed;
+	      }
+	    }
+	  }, {
+	    key: 'moveUp',
+	    value: function moveUp() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_UP) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) < -0.1 || this.wKey.isDown === true || this.cursors.up.isDown;
+	    }
+	  }, {
+	    key: 'moveRight',
+	    value: function moveRight() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_RIGHT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.1 || this.dKey.isDown === true || this.cursors.right.isDown;
+	    }
+	  }, {
+	    key: 'moveDown',
+	    value: function moveDown() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_DOWN) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) > 0.1 || this.sKey.isDown === true || this.cursors.down.isDown;
+	    }
+	  }, {
+	    key: 'moveLeft',
+	    value: function moveLeft() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_LEFT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.1 || this.aKey.isDown === true || this.cursors.left.isDown;
+	    }
+	  }]);
+	
+	  return HordeController;
+	}(Phaser.Sprite);
+	
+	exports.default = HordeController;
 
 /***/ }
 /******/ ]);

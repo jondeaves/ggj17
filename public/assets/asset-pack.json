@@ -1,4 +1,13 @@
 {
+  "splashScreen": [
+    {
+      "type": "image",
+      "key": "bg_splash_screen",
+      "url": "/assets/splashScreen/bg_splash_screen.png",
+      "overwrite": false
+    }
+  ],
+
   "gameplayScreen": [
     {
       "type": "image",

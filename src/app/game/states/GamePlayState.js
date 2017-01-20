@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Player from '../objects/Player';
+import HordeController from '../objects/HordeController';
 
 export default class GamePlayState extends Phaser.State {
   create() {
@@ -12,17 +12,27 @@ export default class GamePlayState extends Phaser.State {
   }
 
   generateWorld() {
-    this.players = this.add.group();
-    this.players.add(new Player(this.game, 50, 50, 'sprite_player'));
+    this.hordeControllers = this.add.group();
+    this.hordeController = new HordeController(this.game, 50, 50, 'sprite_player');
+    this.hordeControllers.add(this.hordeController);
+
+
+    this.game.world.setBounds(null);
+    this.game.camera.follow(this.hordeController);
+  }
+
+  render() {
+    this.game.debug.cameraInfo(this.game.camera, 32, 32);
+    this.game.debug.spriteCoords(this.hordeController, 32, 500);
   }
 
   update() {
     this.updateTimer();
 
-    // Updates related to player
-    this.players.forEach((player) => {
-      // Updates on the player object
-      player.update();
+    // Updates related to hordes
+    this.hordeControllers.forEach((hordeController) => {
+      // Updates on the horde object
+      hordeController.update();
     });
   }
 

@@ -216,8 +216,8 @@
 	      this.game.load.onLoadComplete.add(this.loadComplete, this);
 	
 	      // Begin the load
-	      this.game.load.pack('splashScreen', '/assets/asset-pack.json', null, this);
-	      this.game.load.pack('gameplayScreen', '/assets/asset-pack.json', null, this);
+	      this.game.load.pack('splashScreen', './assets/asset-pack.json', null, this);
+	      this.game.load.pack('gameplayScreen', './assets/asset-pack.json', null, this);
 	
 	      this.game.load.start();
 	    }

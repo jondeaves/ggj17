@@ -3,7 +3,7 @@
     {
       "type": "image",
       "key": "bg_splash_screen",
-      "url": "/assets/splashScreen/bg_splash_screen.png",
+      "url": "./assets/splashScreen/bg_splash_screen.png",
       "overwrite": false
     }
   ],
@@ -12,13 +12,13 @@
     {
       "type": "image",
       "key": "bg_gameplay_screen",
-      "url": "/assets/gameplayScreen/bg_gameplay_screen.png",
+      "url": "./assets/gameplayScreen/bg_gameplay_screen.png",
       "overwrite": false
     },
     {
       "type": "spritesheet",
       "key": "sprite_player",
-      "url": "/assets/gameplayScreen/sprites/sprite_player.png",
+      "url": "./assets/gameplayScreen/sprites/sprite_player.png",
       "frameWidth": 102,
       "frameHeight": 102,
       "frameMax": 10

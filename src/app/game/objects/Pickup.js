@@ -7,6 +7,9 @@ export default class Pickup extends Phaser.Sprite {
   constructor(game, x, y, attr) {
     super(game, x, y, attr.asset, 5);
     this.attributes = attr;
+
+    //  Enable Arcade Physics for the sprite
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
   }
 
 }

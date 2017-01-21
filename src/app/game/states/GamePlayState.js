@@ -3,6 +3,7 @@ import { getRandomInt } from '../helpers';
 import HordeController from '../objects/HordeController';
 import Wave from '../objects/Wave';
 import Pickup from '../objects/Pickup';
+import Seagull from '../objects/Seagull';
 
 export default class GamePlayState extends Phaser.State {
   create() {
@@ -28,6 +29,10 @@ export default class GamePlayState extends Phaser.State {
     this.hordeController = new HordeController(this.game, 450, 150, 'sprite_player');
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
+
+    // Setup seagulls
+    this.seagullGroup = this.add.physicsGroup();
+    this.seagullGroup.add(new Seagull(this.game, 20, 20, this.hordeController));
 
     // Setup the camera
     this.game.world.setBounds(null);
@@ -71,13 +76,26 @@ export default class GamePlayState extends Phaser.State {
     // Update pickup spawns
     this.spawnPickups();
 
+    this.cleanup();
+
     // Physics
+    this.seagullGroup.forEach((gull) => {
+      gull.updateHordeControllers(this.hordeControllers);
+    });
 
     // Player colliding with pickups
     this.game.physics.arcade.collide(this.hordeControllers, this.pickups, this.pickupCollision, null, this);
 
     // Player colliding with wave
     this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
+  }
+
+  cleanup() {
+    this.seagullGroup.forEach((seagull) => {
+      if (seagull.x >= this.game.width || seagull.y >= this.game.height) {
+        seagull.destroy();
+      }
+    });
   }
 
   updateTimer() {

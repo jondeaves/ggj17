@@ -28,6 +28,12 @@
       "overwrite": false
     },
     {
+      "type": "image",
+      "key": "sprite_seagull",
+      "url": "./assets/gameplayScreen/sprites/sprite_seagull.png",
+      "overwrite": false
+    },
+    {
       "type": "spritesheet",
       "key": "sprite_player",
       "url": "./assets/gameplayScreen/sprites/sprite_player.png",

@@ -275,6 +275,10 @@
 	
 	var _Pickup2 = _interopRequireDefault(_Pickup);
 	
+	var _Seagull = __webpack_require__(19);
+	
+	var _Seagull2 = _interopRequireDefault(_Seagull);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -319,6 +323,10 @@
 	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
+	      // Setup seagulls
+	      this.seagullGroup = this.add.physicsGroup();
+	      this.seagullGroup.add(new _Seagull2.default(this.game, 20, 20, this.hordeController));
+	
 	      // Setup the camera
 	      this.game.world.setBounds(null);
 	      this.game.camera.follow(this.hordeController);
@@ -356,18 +364,36 @@
 	  }, {
 	    key: 'update',
 	    value: function update() {
+	      var _this2 = this;
+	
 	      this.updateTimer();
 	
 	      // Update pickup spawns
 	      this.spawnPickups();
 	
+	      this.cleanup();
+	
 	      // Physics
+	      this.seagullGroup.forEach(function (gull) {
+	        gull.updateHordeControllers(_this2.hordeControllers);
+	      });
 	
 	      // Player colliding with pickups
 	      this.game.physics.arcade.collide(this.hordeControllers, this.pickups, this.pickupCollision, null, this);
 	
 	      // Player colliding with wave
 	      this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
+	    }
+	  }, {
+	    key: 'cleanup',
+	    value: function cleanup() {
+	      var _this3 = this;
+	
+	      this.seagullGroup.forEach(function (seagull) {
+	        if (seagull.x >= _this3.game.width || seagull.y >= _this3.game.height) {
+	          seagull.destroy();
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'updateTimer',
@@ -397,18 +423,18 @@
 	  }, {
 	    key: 'spawnPickups',
 	    value: function spawnPickups() {
-	      var _this2 = this;
+	      var _this4 = this;
 	
 	      if (this.pickupTimer >= this.pickupTimeBetween) {
 	        (function () {
-	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this2.pickupDefinitions.length - 1);
-	          var pickupIndex = _lodash2.default.findIndex(_this2.pickupDefinitions, function (o) {
+	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this4.pickupDefinitions.length - 1);
+	          var pickupIndex = _lodash2.default.findIndex(_this4.pickupDefinitions, function (o) {
 	            return o.id === pickupIdent;
 	          });
-	          var generatedPickup = _this2.pickupDefinitions[pickupIndex];
+	          var generatedPickup = _this4.pickupDefinitions[pickupIndex];
 	
-	          _this2.pickups.add(new _Pickup2.default(_this2.game, 500, 200, generatedPickup));
-	          _this2.pickupTimer = 0.0;
+	          _this4.pickups.add(new _Pickup2.default(_this4.game, 500, 200, generatedPickup));
+	          _this4.pickupTimer = 0.0;
 	        })();
 	      }
 	
@@ -18177,9 +18203,12 @@
 	  function HordeController(game, asset, hordeController) {
 	    _classCallCheck(this, HordeController);
 	
-	    // Phaser data
+	    //  Enable Arcade Physics for the sprite
 	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, hordeController.x, hordeController.y, asset, 5));
 	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    // Phaser data
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
 	    _this.moveSpeed = 5;
@@ -18222,10 +18251,17 @@
 	  value: true
 	});
 	exports.toRadians = toRadians;
+	exports.toDegrees = toDegrees;
 	exports.getRandomArbitrary = getRandomArbitrary;
 	exports.getRandomInt = getRandomInt;
+	exports.turnToAngle = turnToAngle;
+	exports.turnToFace = turnToFace;
 	function toRadians(angle) {
 	  return angle * (Math.PI / 180);
+	}
+	
+	function toDegrees(radians) {
+	  return radians * (180 / Math.PI);
 	}
 	
 	function getRandomArbitrary(min, max) {
@@ -18238,6 +18274,29 @@
 	 */
 	function getRandomInt(min, max) {
 	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	
+	function turnToAngle(game, currentAngle, targetAngle, rotationSpeed) {
+	  var difference = targetAngle - currentAngle;
+	
+	  if (difference > game.math.PI) {
+	    difference = 2 * game.math - difference;
+	  } else if (difference < -game.math.PI) {
+	    difference = 2 * game.math + difference;
+	  }
+	
+	  // Move the character's rotation a set amount per unit time
+	  var delta = difference < 0 ? -rotationSpeed : rotationSpeed;
+	  return delta * game.time.elapsed;
+	}
+	
+	function turnToFace(game, obj1, obj2, rotationSpeed) {
+	  var targetAngle = game.math.angleBetween(obj1.x, obj1.y, obj2.x, obj2.y);
+	  obj1.rotation = targetAngle;
+	  // const rotateDiff = turnToAngle(game, obj1.body.rotation, targetAngle, rotationSpeed);
+	  // console.log(rotateDiff);
+	  //
+	  // obj1.rotation += rotateDiff;
 	}
 
 /***/ },
@@ -18269,6 +18328,9 @@
 	    var _this = _possibleConstructorReturn(this, (Pickup.__proto__ || Object.getPrototypeOf(Pickup)).call(this, game, x, y, attr.asset, 5));
 	
 	    _this.attributes = attr;
+	
+	    //  Enable Arcade Physics for the sprite
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	    return _this;
 	  }
 	
@@ -18301,7 +18363,10 @@
 	  function Wave(game, x, y) {
 	    _classCallCheck(this, Wave);
 	
+	    //  Enable Arcade Physics for the sprite
 	    var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, game, x, y, 'sprite_wave', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	
 	    _this.moveSpeed = 0.8;
 	    _this.isMovingTowardLand = true;
@@ -18334,6 +18399,95 @@
 	}(Phaser.Sprite);
 	
 	exports.default = Wave;
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(16);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Seagull = function (_Phaser$Sprite) {
+	  _inherits(Seagull, _Phaser$Sprite);
+	
+	  function Seagull(game, x, y, hordeControllers) {
+	    _classCallCheck(this, Seagull);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (Seagull.__proto__ || Object.getPrototypeOf(Seagull)).call(this, game, x, y, 'sprite_seagull', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    //  Tell it we don't want physics to manage the rotation
+	    _this.rotation = _this.game.physics.arcade.angleBetween(_this, {
+	      x: _this.game.width / 2,
+	      y: _this.game.height / 2
+	    });
+	
+	    // Do we have anything we want to move towards?
+	    _this.target = null;
+	    _this.hordeControllers = hordeControllers;
+	
+	    _this.lostTargetTimer = 0;
+	    return _this;
+	  }
+	
+	  _createClass(Seagull, [{
+	    key: 'changeTarget',
+	    value: function changeTarget(target) {
+	      this.target = target;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      if (this.lostTargetTimer > 0) {
+	        this.lostTargetTimer -= this.game.time.elapsed;
+	      }
+	
+	      if (this.target === null) {
+	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+	
+	        // Without a target search for one
+	        if (this.lostTargetTimer <= 0 && typeof this.hordeControllers !== 'undefined' && this.hordeControllers.length > 0 && this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= 350) {
+	          this.lostTargetTimer = 0;
+	          this.changeTarget(this.hordeControllers.getChildAt(0));
+	        }
+	      } else if (this.target !== null) {
+	        this.rotation = this.game.physics.arcade.moveToObject(this, this.target, 240);
+	
+	        // Lose target if too close, stopped rapid spinning
+	        if (this.game.physics.arcade.distanceBetween(this, this.target) <= 20) {
+	          this.lostTargetTimer = 3000.0;
+	          this.changeTarget(null);
+	        }
+	      } else {
+	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+	      }
+	    }
+	  }, {
+	    key: 'updateHordeControllers',
+	    value: function updateHordeControllers(hordeControllers) {
+	      this.hordeControllers = hordeControllers;
+	    }
+	  }]);
+	
+	  return Seagull;
+	}(Phaser.Sprite);
+	
+	exports.default = Seagull;
 
 /***/ }
 /******/ ]);

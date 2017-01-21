@@ -5,6 +5,9 @@ export default class HordeController extends Phaser.Sprite {
   constructor(game, asset, hordeController) {
     super(game, hordeController.x, hordeController.y, asset, 5);
 
+    //  Enable Arcade Physics for the sprite
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+
     // Phaser data
     this.game = game;
     this.anchor.setTo(0.5);

@@ -97,7 +97,7 @@
     {
       "type": "audio",
       "key": "state_walking_music",
-      "urls": ["/assets/audio/music/state_walking_music.wav"],
+      "urls": ["./assets/audio/music/state_walking_music.wav"],
       "autoDecode": true
     }
 

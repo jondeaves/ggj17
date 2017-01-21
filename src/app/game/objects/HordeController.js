@@ -9,6 +9,8 @@ export default class HordeController extends Phaser.Sprite {
     // Phaser data
     this.game = game;
     this.anchor.setTo(0.5);
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.body.setSize(10, 10, 46, 46);
 
     // Setup animation
     this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
@@ -37,6 +39,8 @@ export default class HordeController extends Phaser.Sprite {
     this.modifiers = {
       moveSpeed: 5,
     };
+    this.targetLocked = false;
+    this.targetLockedPreviousPos = { x: 0, y: 0 };
   }
 
   addToHorde(count) {
@@ -94,8 +98,17 @@ export default class HordeController extends Phaser.Sprite {
   }
 
   updateInput() {
+    if (this.targetLocked !== false) {
+      if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
+        this.x += this.targetLocked.moveSpeed;
+      }
+
+      this.targetLockedPreviousPos = { x: this.targetLocked.x, y: this.targetLocked.y };
+      return;
+    }
+
+
     // Movement
-    // console.log(this.modifiers);
     if (this.moveUp()) {
       this.y -= this.modifiers.moveSpeed;
     } else if (this.moveDown()) {

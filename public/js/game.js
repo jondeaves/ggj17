@@ -267,6 +267,10 @@
 	
 	var _HordeController2 = _interopRequireDefault(_HordeController);
 	
+	var _Wave = __webpack_require__(18);
+	
+	var _Wave2 = _interopRequireDefault(_Wave);
+	
 	var _Pickup = __webpack_require__(17);
 	
 	var _Pickup2 = _interopRequireDefault(_Pickup);
@@ -291,12 +295,15 @@
 	  _createClass(GamePlayState, [{
 	    key: 'create',
 	    value: function create() {
+	      this.stage.backgroundColor = '#9c7c63';
+	
 	      this.stateBg = this.add.image(0, 0, 'bg_gameplay_screen');
 	      this.stateBg.width = this.game.width;
 	      this.stateBg.height = this.game.height;
 	
 	      // Generate the world as it begins
 	      this.generateWorld();
+	      this.generateWater();
 	      this.generatePickups();
 	
 	      // Physics
@@ -308,13 +315,19 @@
 	    value: function generateWorld() {
 	      // Setup the horde
 	      this.hordeControllers = this.add.physicsGroup();
-	      this.hordeController = new _HordeController2.default(this.game, 150, 150, 'sprite_player');
+	      this.hordeController = new _HordeController2.default(this.game, 450, 150, 'sprite_player');
 	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
 	      // Setup the camera
 	      this.game.world.setBounds(null);
 	      this.game.camera.follow(this.hordeController);
+	    }
+	  }, {
+	    key: 'generateWater',
+	    value: function generateWater() {
+	      this.waveGroup = this.add.physicsGroup();
+	      this.waveGroup.add(new _Wave2.default(this.game, 50, 200));
 	    }
 	  }, {
 	    key: 'generatePickups',
@@ -341,12 +354,6 @@
 	      }];
 	    }
 	  }, {
-	    key: 'render',
-	    value: function render() {
-	      this.game.debug.cameraInfo(this.game.camera, 32, 32);
-	      this.game.debug.spriteCoords(this.hordeController, 32, 500);
-	    }
-	  }, {
 	    key: 'update',
 	    value: function update() {
 	      this.updateTimer();
@@ -354,11 +361,13 @@
 	      // Update pickup spawns
 	      this.spawnPickups();
 	
-	      // Updates related to hordes
-	      this.hordeController.update();
-	
 	      // Physics
+	
+	      // Player colliding with pickups
 	      this.game.physics.arcade.collide(this.hordeControllers, this.pickups, this.pickupCollision, null, this);
+	
+	      // Player colliding with wave
+	      this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
 	    }
 	  }, {
 	    key: 'updateTimer',
@@ -374,6 +383,16 @@
 	      console.log('Picked up ' + pickup.attributes.ident);
 	      hordeController.applyPickup(pickup);
 	      pickup.destroy();
+	    }
+	  }, {
+	    key: 'waveCollision',
+	    value: function waveCollision(hordeController, wave) {
+	      if (wave.isMovingTowardLand) {
+	        hordeController.targetLocked = wave;
+	        hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y };
+	      } else {
+	        hordeController.targetLocked = false;
+	      }
 	    }
 	  }, {
 	    key: 'spawnPickups',
@@ -17984,6 +18003,8 @@
 	
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    _this.body.setSize(10, 10, 46, 46);
 	
 	    // Setup animation
 	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
@@ -18012,6 +18033,8 @@
 	    _this.modifiers = {
 	      moveSpeed: 5
 	    };
+	    _this.targetLocked = false;
+	    _this.targetLockedPreviousPos = { x: 0, y: 0 };
 	    return _this;
 	  }
 	
@@ -18079,8 +18102,16 @@
 	  }, {
 	    key: 'updateInput',
 	    value: function updateInput() {
+	      if (this.targetLocked !== false) {
+	        if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
+	          this.x += this.targetLocked.moveSpeed;
+	        }
+	
+	        this.targetLockedPreviousPos = { x: this.targetLocked.x, y: this.targetLocked.y };
+	        return;
+	      }
+	
 	      // Movement
-	      // console.log(this.modifiers);
 	      if (this.moveUp()) {
 	        this.y -= this.modifiers.moveSpeed;
 	      } else if (this.moveDown()) {
@@ -18245,6 +18276,64 @@
 	}(Phaser.Sprite);
 	
 	exports.default = Pickup;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Wave = function (_Phaser$Sprite) {
+	  _inherits(Wave, _Phaser$Sprite);
+	
+	  function Wave(game, x, y) {
+	    _classCallCheck(this, Wave);
+	
+	    var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, game, x, y, 'sprite_wave', 5));
+	
+	    _this.moveSpeed = 0.8;
+	    _this.isMovingTowardLand = true;
+	    _this.moveTimer = 0.0;
+	    _this.totalMovingTime = 1800;
+	    return _this;
+	  }
+	
+	  _createClass(Wave, [{
+	    key: 'update',
+	    value: function update() {
+	      if (this.isMovingTowardLand) {
+	        this.x += this.moveSpeed;
+	      } else {
+	        this.x -= this.moveSpeed;
+	      }
+	
+	      if (this.moveTimer >= this.totalMovingTime) {
+	        this.isMovingTowardLand = !this.isMovingTowardLand;
+	        this.moveTimer = 0;
+	      }
+	      this.moveTimer += this.game.time.elapsed;
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {}
+	  }]);
+	
+	  return Wave;
+	}(Phaser.Sprite);
+	
+	exports.default = Wave;
 
 /***/ }
 /******/ ]);

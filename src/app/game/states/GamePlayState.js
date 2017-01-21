@@ -1,16 +1,20 @@
 import _ from 'lodash';
 import { getRandomInt } from '../helpers';
 import HordeController from '../objects/HordeController';
+import Wave from '../objects/Wave';
 import Pickup from '../objects/Pickup';
 
 export default class GamePlayState extends Phaser.State {
   create() {
+    this.stage.backgroundColor = '#9c7c63';
+
     this.stateBg = this.add.image(0, 0, 'bg_gameplay_screen');
     this.stateBg.width = this.game.width;
     this.stateBg.height = this.game.height;
 
     // Generate the world as it begins
     this.generateWorld();
+    this.generateWater();
     this.generatePickups();
 
     // Physics
@@ -21,13 +25,18 @@ export default class GamePlayState extends Phaser.State {
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
-    this.hordeController = new HordeController(this.game, 150, 150, 'sprite_player');
+    this.hordeController = new HordeController(this.game, 450, 150, 'sprite_player');
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
     // Setup the camera
     this.game.world.setBounds(null);
     this.game.camera.follow(this.hordeController);
+  }
+
+  generateWater() {
+    this.waveGroup = this.add.physicsGroup();
+    this.waveGroup.add(new Wave(this.game, 50, 200));
   }
 
   generatePickups() {
@@ -56,22 +65,19 @@ export default class GamePlayState extends Phaser.State {
     ];
   }
 
-  render() {
-    this.game.debug.cameraInfo(this.game.camera, 32, 32);
-    this.game.debug.spriteCoords(this.hordeController, 32, 500);
-  }
-
   update() {
     this.updateTimer();
 
     // Update pickup spawns
     this.spawnPickups();
 
-    // Updates related to hordes
-    this.hordeController.update();
-
     // Physics
+
+    // Player colliding with pickups
     this.game.physics.arcade.collide(this.hordeControllers, this.pickups, this.pickupCollision, null, this);
+
+    // Player colliding with wave
+    this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
   }
 
   updateTimer() {
@@ -85,6 +91,15 @@ export default class GamePlayState extends Phaser.State {
     console.log(`Picked up ${pickup.attributes.ident}`);
     hordeController.applyPickup(pickup);
     pickup.destroy();
+  }
+
+  waveCollision(hordeController, wave) {
+    if (wave.isMovingTowardLand) {
+      hordeController.targetLocked = wave;
+      hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y }
+    } else {
+      hordeController.targetLocked = false;
+    }
   }
 
   spawnPickups() {

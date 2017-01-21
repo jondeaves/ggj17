@@ -22,6 +22,12 @@
       "overwrite": false
     },
     {
+      "type": "image",
+      "key": "sprite_wave",
+      "url": "./assets/gameplayScreen/sprites/sprite_wave.png",
+      "overwrite": false
+    },
+    {
       "type": "spritesheet",
       "key": "sprite_player",
       "url": "./assets/gameplayScreen/sprites/sprite_player.png",

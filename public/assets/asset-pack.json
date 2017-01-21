@@ -8,6 +8,8 @@
     }
   ],
 
+  "menuScreen": [],
+
   "gameplayScreen": [
     {
       "type": "image",
@@ -97,12 +99,49 @@
     {
       "type": "audio",
       "key": "state_walking_music",
-      "urls": ["./assets/audio/music/state_walking_music.wav"],
+      "urls": ["./assets/audio/Music/state_walking_music.wav"],
       "autoDecode": true
     }
 
 
   ],
+
+  "gameoverScreen": [
+    {
+      "type": "image",
+      "key": "bg_gameover_screen",
+      "url": "./assets/gameoverScreen/bg_gameover_screen.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "bg_gameover_alt_screen",
+      "url": "./assets/gameoverScreen/bg_gameover_alt_screen.png",
+      "overwrite": false
+    },
+    {
+      "type": "audio",
+      "key": "state_dead_music",
+      "urls": ["./assets/audio/Music/state_dead_music.wav"],
+      "autoDecode": true
+    }
+  ],
+
+  "victoryScreen": [
+    {
+      "type": "image",
+      "key": "bg_victory_screen",
+      "url": "./assets/victoryScreen/bg_victory_screen.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "overlay_victory_screen",
+      "url": "./assets/victoryScreen/overlay_victory_screen.png",
+      "overwrite": false
+    }
+  ],
+
 
   "meta": {
     "app": "Phaser ES6 Starter",

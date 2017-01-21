@@ -13,6 +13,8 @@ export default class HordeController extends Phaser.Sprite {
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
     this.body.setSize(30, 30, 46, 46);
 
+    this.isDead = false;
+
     // Setup animation
     this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10, true);
 
@@ -37,6 +39,7 @@ export default class HordeController extends Phaser.Sprite {
     // Modifiers, pickups
     this.modifiers = {
       moveSpeed: 5,
+      health: 2,
     };
     this.targetLocked = false;
     this.targetLockedPreviousPos = { x: 0, y: 0 };
@@ -57,12 +60,16 @@ export default class HordeController extends Phaser.Sprite {
 
   removeFromHorde(count) {
     let iHorde = 0;
+    let hasRemoved = false;
 
     for (iHorde; iHorde < count; iHorde += 1) {
       if (this.members.length > 0) {
+        hasRemoved = true;
         this.members.remove(this.members.getRandom(), true, false);
       }
     }
+
+    return hasRemoved;
   }
 
   applyPickup(pickup) {
@@ -83,6 +90,10 @@ export default class HordeController extends Phaser.Sprite {
   update() {
     this.updateInput();
     this.updateHorde();
+
+    if (!this.isDead) {
+      this.checkDeath();
+    }
   }
 
   updateHorde() {
@@ -146,6 +157,14 @@ export default class HordeController extends Phaser.Sprite {
     }
   }
 
+  checkDeath() {
+    if (this.modifiers.health > 0) {
+      return false;
+    }
+
+    this.isDead = true;
+    return true;
+  }
 
   moveUp() {
     return (
@@ -184,7 +203,11 @@ export default class HordeController extends Phaser.Sprite {
   }
 
   attacked() {
-    this.removeFromHorde(1);
-    console.log('you are attacked, sir!');
+    const removeState = this.removeFromHorde(1);
+    if (removeState === false) {
+      // if false, assume we have no members left
+      // and have been directly attacked.
+      this.modifiers.health -= 1;
+    }
   }
 }

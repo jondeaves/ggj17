@@ -106,6 +106,13 @@ export default class GamePlayState extends Phaser.State {
   }
 
   update() {
+    // Check if horde controller is dead
+    if (this.hordeController.isDead === true) {
+      this.backgroundMusic.stop();
+      this.game.state.start('GameOverState', true, false);
+    }
+
+
     this.updateTimer();
 
     // Update pickup spawns
@@ -128,7 +135,6 @@ export default class GamePlayState extends Phaser.State {
     this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
 
 
-
     // Check if seagull is colliding with horde but not umbrella
     this.seagullGroup.forEach((seagull) => {
       const seagullBound = seagull.getBounds();
@@ -148,7 +154,7 @@ export default class GamePlayState extends Phaser.State {
       if (hordeSeagullCollision === true && umbrellaCollide === false) {
         seagull.setLastCollision(this.totalTimeActive);
 
-        if (seagull.canAttack) {
+        if (seagull.canAttack && seagull.checkAttackChance()) {
           seagull.canAttack = false;
           this.hordeController.attacked();
         }
@@ -173,7 +179,6 @@ export default class GamePlayState extends Phaser.State {
   }
 
   pickupCollision(hordeController, pickup) {
-    console.log(`Picked up ${pickup.attributes.ident}`);
     hordeController.applyPickup(pickup);
     pickup.destroy();
   }

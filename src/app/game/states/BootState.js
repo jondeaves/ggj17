@@ -1,6 +1,5 @@
 /* global Fabrique */
 export default class BootState extends Phaser.State {
-
   create() {
     // For multi touch devices, this is how many touches can be triggered at once
     this.game.input.maxPointers = 2;
@@ -17,5 +16,4 @@ export default class BootState extends Phaser.State {
     // Move Along
     this.game.state.start('LoadingState', true, false);
   }
-
 }

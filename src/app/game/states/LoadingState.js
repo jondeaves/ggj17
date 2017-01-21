@@ -1,9 +1,4 @@
 export default class LoadingState extends Phaser.State {
-
-  init(sessionManager) {
-    this.sessionManager = sessionManager;
-  }
-
   create() {
     // Just to get us started
     this.stage.backgroundColor = '#182d3b';
@@ -15,7 +10,10 @@ export default class LoadingState extends Phaser.State {
 
     // Begin the load
     this.game.load.pack('splashScreen', './assets/asset-pack.json', null, this);
+    this.game.load.pack('menuScreen', './assets/asset-pack.json', null, this);
     this.game.load.pack('gameplayScreen', './assets/asset-pack.json', null, this);
+    this.game.load.pack('gameoverScreen', './assets/asset-pack.json', null, this);
+    this.game.load.pack('victoryScreen', './assets/asset-pack.json', null, this);
 
     this.game.load.start();
   }
@@ -30,7 +28,9 @@ export default class LoadingState extends Phaser.State {
 
   loadComplete() {
     this.text.setText('Load Complete');
-    // this.state.start('SplashState', true, false);
-    this.state.start('GamePlayState', true, false);
+    this.state.start('SplashState', true, false);
+    // this.state.start('GamePlayState', true, false);
+    // this.state.start('VictoryState', true, false);
+    // this.state.start('GameOverState', true, false);
   }
 }

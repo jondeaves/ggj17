@@ -79,9 +79,21 @@
 	
 	var _SplashState2 = _interopRequireDefault(_SplashState);
 	
+	var _MenuState = __webpack_require__(22);
+	
+	var _MenuState2 = _interopRequireDefault(_MenuState);
+	
 	var _GamePlayState = __webpack_require__(5);
 	
 	var _GamePlayState2 = _interopRequireDefault(_GamePlayState);
+	
+	var _GameOverState = __webpack_require__(21);
+	
+	var _GameOverState2 = _interopRequireDefault(_GameOverState);
+	
+	var _VictoryState = __webpack_require__(23);
+	
+	var _VictoryState2 = _interopRequireDefault(_VictoryState);
 	
 	var _constants = __webpack_require__(14);
 	
@@ -106,7 +118,10 @@
 	    _this.state.add('BootState', _BootState2.default, false);
 	    _this.state.add('LoadingState', _LoadingState2.default);
 	    _this.state.add('SplashState', _SplashState2.default);
+	    _this.state.add('MenuState', _MenuState2.default);
 	    _this.state.add('GamePlayState', _GamePlayState2.default);
+	    _this.state.add('GameOverState', _GameOverState2.default);
+	    _this.state.add('VictoryState', _VictoryState2.default);
 	
 	    _this.state.start('BootState', true, false);
 	
@@ -200,11 +215,6 @@
 	  }
 	
 	  _createClass(LoadingState, [{
-	    key: 'init',
-	    value: function init(sessionManager) {
-	      this.sessionManager = sessionManager;
-	    }
-	  }, {
 	    key: 'create',
 	    value: function create() {
 	      // Just to get us started
@@ -217,7 +227,10 @@
 	
 	      // Begin the load
 	      this.game.load.pack('splashScreen', './assets/asset-pack.json', null, this);
+	      this.game.load.pack('menuScreen', './assets/asset-pack.json', null, this);
 	      this.game.load.pack('gameplayScreen', './assets/asset-pack.json', null, this);
+	      this.game.load.pack('gameoverScreen', './assets/asset-pack.json', null, this);
+	      this.game.load.pack('victoryScreen', './assets/asset-pack.json', null, this);
 	
 	      this.game.load.start();
 	    }
@@ -235,8 +248,10 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      // this.state.start('SplashState', true, false);
-	      this.state.start('GamePlayState', true, false);
+	      this.state.start('SplashState', true, false);
+	      // this.state.start('GamePlayState', true, false);
+	      // this.state.start('VictoryState', true, false);
+	      // this.state.start('GameOverState', true, false);
 	    }
 	  }]);
 	
@@ -273,11 +288,6 @@
 	  }
 	
 	  _createClass(SplashState, [{
-	    key: 'init',
-	    value: function init(sessionManager) {
-	      this.sessionManager = sessionManager;
-	    }
-	  }, {
 	    key: 'create',
 	    value: function create() {
 	      // Just to get us started
@@ -285,28 +295,23 @@
 	      this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
 	      this.stateBg.width = this.game.width;
 	      this.stateBg.height = this.game.height;
+	
+	      this.totalTimeActive = 0;
 	    }
 	  }, {
 	    key: 'update',
 	    value: function update() {
-	      this.updateTimer();
+	      this.totalTimeActive += this.time.elapsed;
 	
-	      if (this.totalTimeActive > 3000) {
+	      if (this.totalTimeActive > 1500) {
 	        this.splashComplete();
 	      }
 	    }
 	  }, {
-	    key: 'updateTimer',
-	    value: function updateTimer() {
-	      if (typeof this.totalTimeActive === 'undefined') {
-	        this.totalTimeActive = 0;
-	      }
-	      this.totalTimeActive += this.time.elapsed;
-	    }
-	  }, {
 	    key: 'splashComplete',
 	    value: function splashComplete() {
-	      this.state.start('GamePlayState', true, false);
+	      this.totalTimeActive = 0;
+	      this.state.start('MenuState', true, false);
 	    }
 	  }]);
 	
@@ -477,6 +482,12 @@
 	    value: function update() {
 	      var _this3 = this;
 	
+	      // Check if horde controller is dead
+	      if (this.hordeController.isDead === true) {
+	        this.backgroundMusic.stop();
+	        this.game.state.start('GameOverState', true, false);
+	      }
+	
 	      this.updateTimer();
 	
 	      // Update pickup spawns
@@ -517,7 +528,7 @@
 	        if (hordeSeagullCollision === true && umbrellaCollide === false) {
 	          seagull.setLastCollision(_this3.totalTimeActive);
 	
-	          if (seagull.canAttack) {
+	          if (seagull.canAttack && seagull.checkAttackChance()) {
 	            seagull.canAttack = false;
 	            _this3.hordeController.attacked();
 	          }
@@ -547,7 +558,6 @@
 	  }, {
 	    key: 'pickupCollision',
 	    value: function pickupCollision(hordeController, pickup) {
-	      console.log('Picked up ' + pickup.attributes.ident);
 	      hordeController.applyPickup(pickup);
 	      pickup.destroy();
 	    }
@@ -17811,6 +17821,8 @@
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	    _this.body.setSize(30, 30, 46, 46);
 	
+	    _this.isDead = false;
+	
 	    // Setup animation
 	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10, true);
 	
@@ -17834,7 +17846,8 @@
 	
 	    // Modifiers, pickups
 	    _this.modifiers = {
-	      moveSpeed: 5
+	      moveSpeed: 5,
+	      health: 2
 	    };
 	    _this.targetLocked = false;
 	    _this.targetLockedPreviousPos = { x: 0, y: 0 };
@@ -17854,12 +17867,16 @@
 	    key: 'removeFromHorde',
 	    value: function removeFromHorde(count) {
 	      var iHorde = 0;
+	      var hasRemoved = false;
 	
 	      for (iHorde; iHorde < count; iHorde += 1) {
 	        if (this.members.length > 0) {
+	          hasRemoved = true;
 	          this.members.remove(this.members.getRandom(), true, false);
 	        }
 	      }
+	
+	      return hasRemoved;
 	    }
 	  }, {
 	    key: 'applyPickup',
@@ -17887,6 +17904,10 @@
 	    value: function update() {
 	      this.updateInput();
 	      this.updateHorde();
+	
+	      if (!this.isDead) {
+	        this.checkDeath();
+	      }
 	    }
 	  }, {
 	    key: 'updateHorde',
@@ -17953,6 +17974,16 @@
 	      }
 	    }
 	  }, {
+	    key: 'checkDeath',
+	    value: function checkDeath() {
+	      if (this.modifiers.health > 0) {
+	        return false;
+	      }
+	
+	      this.isDead = true;
+	      return true;
+	    }
+	  }, {
 	    key: 'moveUp',
 	    value: function moveUp() {
 	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_UP) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) < -0.1 || this.wKey.isDown === true || this.cursors.up.isDown;
@@ -17975,8 +18006,12 @@
 	  }, {
 	    key: 'attacked',
 	    value: function attacked() {
-	      this.removeFromHorde(1);
-	      console.log('you are attacked, sir!');
+	      var removeState = this.removeFromHorde(1);
+	      if (removeState === false) {
+	        // if false, assume we have no members left
+	        // and have been directly attacked.
+	        this.modifiers.health -= 1;
+	      }
 	    }
 	  }]);
 	
@@ -18247,6 +18282,11 @@
 	    key: 'updateHordeControllers',
 	    value: function updateHordeControllers(hordeControllers) {
 	      this.hordeControllers = hordeControllers;
+	    }
+	  }, {
+	    key: 'checkAttackChance',
+	    value: function checkAttackChance() {
+	      return Math.random() < 0.5 ? true : false;
 	    }
 	  }]);
 	
@@ -18716,6 +18756,176 @@
 	}(Phaser.Sprite);
 	
 	exports.default = Umbrella;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var GameOverState = function (_Phaser$State) {
+	  _inherits(GameOverState, _Phaser$State);
+	
+	  function GameOverState() {
+	    _classCallCheck(this, GameOverState);
+	
+	    return _possibleConstructorReturn(this, (GameOverState.__proto__ || Object.getPrototypeOf(GameOverState)).apply(this, arguments));
+	  }
+	
+	  _createClass(GameOverState, [{
+	    key: 'create',
+	    value: function create() {
+	      var _this2 = this;
+	
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_gameover_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	
+	      // Audio
+	      this.deadSfx = this.game.add.audio('state_dead_music');
+	      this.deadSfx.play();
+	      this.deadSfx.onStop.add(function () {
+	        _this2.game.state.start('SplashState', true, false);
+	      }, this);
+	    }
+	  }]);
+	
+	  return GameOverState;
+	}(Phaser.State);
+	
+	exports.default = GameOverState;
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var MenuState = function (_Phaser$State) {
+	  _inherits(MenuState, _Phaser$State);
+	
+	  function MenuState() {
+	    _classCallCheck(this, MenuState);
+	
+	    return _possibleConstructorReturn(this, (MenuState.__proto__ || Object.getPrototypeOf(MenuState)).apply(this, arguments));
+	  }
+	
+	  _createClass(MenuState, [{
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	
+	      console.log('menu state');
+	
+	      // Gamepad
+	      this.game.input.gamepad.start();
+	      this.gamePad = this.game.input.gamepad.pad1;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      var _this2 = this;
+	
+	      this.game.input.onTap.add(this.switchState, this);
+	
+	      this.game.input.keyboard.onPressCallback = function () {
+	        _this2.switchState();
+	      };
+	
+	      //  We can't do this until we know that the gamepad has been connected and is started
+	      if (this.gamePad.justPressed(Phaser.Gamepad.XBOX360_A) || this.gamePad.justPressed(Phaser.Gamepad.XBOX360_B) || this.gamePad.justPressed(Phaser.Gamepad.XBOX360_X) || this.gamePad.justPressed(Phaser.Gamepad.XBOX360_Y) || this.gamePad.justPressed(Phaser.Gamepad.XBOX360_START)) {
+	        this.switchState();
+	      }
+	    }
+	  }, {
+	    key: 'switchState',
+	    value: function switchState() {
+	      this.state.start('GamePlayState', true, false);
+	    }
+	  }]);
+	
+	  return MenuState;
+	}(Phaser.State);
+	
+	exports.default = MenuState;
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var MenuState = function (_Phaser$State) {
+	  _inherits(MenuState, _Phaser$State);
+	
+	  function MenuState() {
+	    _classCallCheck(this, MenuState);
+	
+	    return _possibleConstructorReturn(this, (MenuState.__proto__ || Object.getPrototypeOf(MenuState)).apply(this, arguments));
+	  }
+	
+	  _createClass(MenuState, [{
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	
+	      this.stateBg = this.add.image(0, 0, 'bg_victory_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	
+	      this.stateOverlay = this.add.image(0, 0, 'overlay_victory_screen');
+	      this.stateOverlay.width = this.game.width;
+	      this.stateOverlay.height = this.game.height;
+	    }
+	  }]);
+	
+	  return MenuState;
+	}(Phaser.State);
+	
+	exports.default = MenuState;
 
 /***/ }
 /******/ ]);

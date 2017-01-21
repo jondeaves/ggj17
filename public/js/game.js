@@ -353,6 +353,10 @@
 	
 	var _Seagull2 = _interopRequireDefault(_Seagull);
 	
+	var _Umbrella = __webpack_require__(20);
+	
+	var _Umbrella2 = _interopRequireDefault(_Umbrella);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -380,7 +384,6 @@
 	      this.bgLayer0 = this.add.image(0, 0, 'sprite_bg_layer_0');
 	      this.bgLayer1 = this.add.image(0, 0, 'sprite_bg_layer_1');
 	      this.bgLayer2 = this.add.image(0, 0, 'sprite_bg_layer_2');
-	      this.bgLayer3 = this.add.image(0, 0, 'sprite_bg_layer_3');
 	
 	      // Generate the world as it begins
 	      this.generateWorld();
@@ -397,45 +400,41 @@
 	
 	      // Sprite ordering
 	      this.game.world.sendToBack(this.seagullGroup);
+	      this.game.world.sendToBack(this.umbrellaGroup);
 	      this.game.world.sendToBack(this.waveGroup);
-	      this.game.world.sendToBack(this.pickups);
+	      this.game.world.sendToBack(this.bgLayer2); // Water overlay
 	
-	      // Make sure crabs go underwater and under the umbrellas
-	      // layer 2 = water
-	      // layer 3 = umbrellas
-	      this.game.world.sendToBack(this.bgLayer3);
-	      this.game.world.sendToBack(this.bgLayer2);
-	
+	      this.game.world.sendToBack(this.hordeControllers);
 	      this.hordeControllers.forEach(function (hordeController) {
-	        // Send each member of the horde under the oceanb
+	        // Horde controller and members appear under water but above pickups
 	        _this2.game.world.sendToBack(hordeController.members);
 	      });
 	
-	      // Send the controller itself under the ocean but above the horde
-	      this.game.world.sendToBack(this.hordeControllers);
-	
-	      // Send the sand and algae to the bottom
-	      // layer 0 = sand
-	      // layer 1 = algae
-	      this.game.world.sendToBack(this.bgLayer1);
-	      this.game.world.sendToBack(this.bgLayer0);
+	      this.game.world.sendToBack(this.pickups);
+	      this.game.world.sendToBack(this.bgLayer1); // Algae
+	      this.game.world.sendToBack(this.bgLayer0); // Sand and road
 	    }
 	  }, {
 	    key: 'generateWorld',
 	    value: function generateWorld() {
 	      // Setup the horde
 	      this.hordeControllers = this.add.physicsGroup();
-	      this.hordeController = new _HordeController2.default(this.game, 4600, 400, 'sprite_hermy');
+	      this.hordeController = new _HordeController2.default(this.game, 8000, 400, 'sprite_hermy');
 	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
 	      // Setup seagulls
-	      this.seagullGroup = this.add.physicsGroup();
-	      this.seagullGroup.add(new _Seagull2.default(this.game, 4600, 20, this.hordeController));
+	      this.seagullGroup = this.add.group();
+	      this.seagullGroup.add(new _Seagull2.default(this.game, 8000, 20, this.hordeController));
 	
 	      // Setup enemy crab
 	      this.enemyCrabGroup = this.add.physicsGroup();
 	      this.enemyCrabGroup.add(new _EnemyCrab2.default(this.game, 4800, 100));
+	
+	      // Setup enemy crab
+	      this.umbrellaGroup = this.add.physicsGroup();
+	      this.umbrellaGroup.add(new _Umbrella2.default(this.game, 6920, 160));
+	      this.umbrellaGroup.add(new _Umbrella2.default(this.game, 6920, 1080));
 	
 	      // Setup the camera
 	      this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
@@ -495,6 +494,35 @@
 	
 	      // Player colliding with wave
 	      this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
+	
+	      // Player colliding with wave
+	      this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
+	
+	      // Check if seagull is colliding with horde but not umbrella
+	      this.seagullGroup.forEach(function (seagull) {
+	        var seagullBound = seagull.getBounds();
+	        var hordeBounds = _this3.hordeController.getBounds();
+	
+	        // Does this seagull overlap with the horde controller
+	        var hordeSeagullCollision = Phaser.Rectangle.intersects(seagullBound, hordeBounds);
+	
+	        // Is this seagull on top of an umbrella
+	        var umbrellaCollide = false;
+	        _this3.umbrellaGroup.forEach(function (umbrella) {
+	          if (Phaser.Rectangle.intersects(seagullBound, umbrella.getBounds())) {
+	            umbrellaCollide = true;
+	          }
+	        });
+	
+	        if (hordeSeagullCollision === true && umbrellaCollide === false) {
+	          seagull.setLastCollision(_this3.totalTimeActive);
+	
+	          if (seagull.canAttack) {
+	            seagull.canAttack = false;
+	            _this3.hordeController.attacked();
+	          }
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'cleanup',
@@ -514,6 +542,7 @@
 	        this.totalTimeActive = 0;
 	      }
 	      this.totalTimeActive += this.time.elapsed;
+	      this.game.totalTimeActive = this.totalTimeActive;
 	    }
 	  }, {
 	    key: 'pickupCollision',
@@ -530,6 +559,23 @@
 	        hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y };
 	      } else {
 	        hordeController.targetLocked = false;
+	      }
+	    }
+	  }, {
+	    key: 'seagullUmbrellaCollision',
+	    value: function seagullUmbrellaCollision(umbrella, seagull) {
+	      seagull.setLastCollision(this.totalTimeActive);
+	    }
+	  }, {
+	    key: 'umbrellaCollision',
+	    value: function umbrellaCollision(hordeController, umbrella) {
+	      umbrella.setLastCollision(this.totalTimeActive);
+	    }
+	  }, {
+	    key: 'seagullCollision',
+	    value: function seagullCollision(hordeController, seagull) {
+	      if (seagull.canAttack) {
+	        hordeController.attacked();
 	      }
 	    }
 	  }, {
@@ -17805,6 +17851,17 @@
 	      }
 	    }
 	  }, {
+	    key: 'removeFromHorde',
+	    value: function removeFromHorde(count) {
+	      var iHorde = 0;
+	
+	      for (iHorde; iHorde < count; iHorde += 1) {
+	        if (this.members.length > 0) {
+	          this.members.remove(this.members.getRandom(), true, false);
+	        }
+	      }
+	    }
+	  }, {
 	    key: 'applyPickup',
 	    value: function applyPickup(pickup) {
 	      var _this2 = this;
@@ -17914,6 +17971,12 @@
 	    key: 'moveLeft',
 	    value: function moveLeft() {
 	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_LEFT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.1 || this.aKey.isDown === true || this.cursors.left.isDown;
+	    }
+	  }, {
+	    key: 'attacked',
+	    value: function attacked() {
+	      this.removeFromHorde(1);
+	      console.log('you are attacked, sir!');
 	    }
 	  }]);
 	
@@ -18132,10 +18195,17 @@
 	    _this.hordeControllers = hordeControllers;
 	
 	    _this.lostTargetTimer = 0;
+	
+	    _this.canAttack = true;
 	    return _this;
 	  }
 	
 	  _createClass(Seagull, [{
+	    key: 'setLastCollision',
+	    value: function setLastCollision(time) {
+	      this.lastCollision = time;
+	    }
+	  }, {
 	    key: 'changeTarget',
 	    value: function changeTarget(target) {
 	      this.target = target;
@@ -18143,6 +18213,12 @@
 	  }, {
 	    key: 'update',
 	    value: function update() {
+	      if (this.game.totalTimeActive - this.lastCollision < 10) {
+	        this.canAttack = false;
+	      } else {
+	        this.canAttack = true;
+	      }
+	
 	      if (this.lostTargetTimer > 0) {
 	        this.lostTargetTimer -= this.game.time.elapsed;
 	      }
@@ -18196,7 +18272,7 @@
 	      height: 1080
 	    },
 	    bounds: {
-	      width: 7500,
+	      width: 8887,
 	      height: 1755
 	    },
 	    boundOffset: 50
@@ -18589,6 +18665,57 @@
 	}(Phaser.Sprite);
 	
 	exports.default = EnemyCrab;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Umbrella = function (_Phaser$Sprite) {
+	  _inherits(Umbrella, _Phaser$Sprite);
+	
+	  function Umbrella(game, x, y) {
+	    _classCallCheck(this, Umbrella);
+	
+	    var _this = _possibleConstructorReturn(this, (Umbrella.__proto__ || Object.getPrototypeOf(Umbrella)).call(this, game, x, y, 'sprite_umbrella', 5));
+	
+	    _this.lastCollision = 0;
+	    return _this;
+	  }
+	
+	  _createClass(Umbrella, [{
+	    key: 'setLastCollision',
+	    value: function setLastCollision(time) {
+	      this.lastCollision = time;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      if (this.game.totalTimeActive - this.lastCollision < 50) {
+	        this.alpha = 0.3;
+	      } else {
+	        this.alpha = 1;
+	      }
+	    }
+	  }]);
+	
+	  return Umbrella;
+	}(Phaser.Sprite);
+	
+	exports.default = Umbrella;
 
 /***/ }
 /******/ ]);

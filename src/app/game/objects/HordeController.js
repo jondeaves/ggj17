@@ -55,6 +55,16 @@ export default class HordeController extends Phaser.Sprite {
     }
   }
 
+  removeFromHorde(count) {
+    let iHorde = 0;
+
+    for (iHorde; iHorde < count; iHorde += 1) {
+      if (this.members.length > 0) {
+        this.members.remove(this.members.getRandom(), true, false);
+      }
+    }
+  }
+
   applyPickup(pickup) {
     if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
       this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
@@ -171,5 +181,10 @@ export default class HordeController extends Phaser.Sprite {
       this.aKey.isDown === true ||
       this.cursors.left.isDown
     );
+  }
+
+  attacked() {
+    this.removeFromHorde(1);
+    console.log('you are attacked, sir!');
   }
 }

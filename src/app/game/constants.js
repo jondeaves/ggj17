@@ -6,7 +6,7 @@ export default {
       height: 1080,
     },
     bounds: {
-      width: 7500,
+      width: 8887,
       height: 1755,
     },
     boundOffset: 50,

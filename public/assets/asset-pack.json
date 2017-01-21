@@ -27,12 +27,6 @@
       "url": "./assets/gameplayScreen/sprite_bg_layer_2.png",
       "overwrite": false
     },
-    {
-      "type": "image",
-      "key": "sprite_bg_layer_3",
-      "url": "./assets/gameplayScreen/sprite_bg_layer_3.png",
-      "overwrite": false
-    },
 
     {
       "type": "image",
@@ -52,6 +46,13 @@
       "url": "./assets/gameplayScreen/sprites/sprite_seagull.png",
       "overwrite": false
     },
+    {
+      "type": "image",
+      "key": "sprite_umbrella",
+      "url": "./assets/gameplayScreen/sprites/sprite_umbrella.png",
+      "overwrite": false
+    },
+
     {
       "type": "spritesheet",
       "key": "sprite_player",
@@ -84,7 +85,6 @@
       "frameHeight": 646,
       "frameMax": 6
     },
-
     {
       "type": "spritesheet",
       "key": "sprite_crab_enemy",

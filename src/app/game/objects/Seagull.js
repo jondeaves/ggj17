@@ -19,6 +19,12 @@ export default class Seagull extends Phaser.Sprite {
     this.hordeControllers = hordeControllers;
 
     this.lostTargetTimer = 0;
+
+    this.canAttack = true;
+  }
+
+  setLastCollision(time) {
+    this.lastCollision = time;
   }
 
   changeTarget(target) {
@@ -26,6 +32,13 @@ export default class Seagull extends Phaser.Sprite {
   }
 
   update() {
+    if ((this.game.totalTimeActive - this.lastCollision) < 10) {
+      this.canAttack = false;
+    } else {
+      this.canAttack = true;
+    }
+
+
     if (this.lostTargetTimer > 0) {
       this.lostTargetTimer -= this.game.time.elapsed;
     }

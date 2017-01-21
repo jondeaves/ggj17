@@ -5,6 +5,7 @@ import EnemyCrab from '../objects/EnemyCrab';
 import Wave from '../objects/Wave';
 import Pickup from '../objects/Pickup';
 import Seagull from '../objects/Seagull';
+import Umbrella from '../objects/Umbrella';
 
 export default class GamePlayState extends Phaser.State {
   create() {
@@ -13,7 +14,6 @@ export default class GamePlayState extends Phaser.State {
     this.bgLayer0 = this.add.image(0, 0, 'sprite_bg_layer_0');
     this.bgLayer1 = this.add.image(0, 0, 'sprite_bg_layer_1');
     this.bgLayer2 = this.add.image(0, 0, 'sprite_bg_layer_2');
-    this.bgLayer3 = this.add.image(0, 0, 'sprite_bg_layer_3');
 
 
     // Generate the world as it begins
@@ -29,47 +29,43 @@ export default class GamePlayState extends Phaser.State {
     this.backgroundMusic = this.game.add.audio('state_walking_music');
     this.backgroundMusic.loopFull(0.6);
 
+
     // Sprite ordering
     this.game.world.sendToBack(this.seagullGroup);
+    this.game.world.sendToBack(this.umbrellaGroup);
     this.game.world.sendToBack(this.waveGroup);
-    this.game.world.sendToBack(this.pickups);
+    this.game.world.sendToBack(this.bgLayer2);        // Water overlay
 
-
-    // Make sure crabs go underwater and under the umbrellas
-    // layer 2 = water
-    // layer 3 = umbrellas
-    this.game.world.sendToBack(this.bgLayer3);
-    this.game.world.sendToBack(this.bgLayer2);
-
+    this.game.world.sendToBack(this.hordeControllers);
     this.hordeControllers.forEach((hordeController) => {
-      // Send each member of the horde under the oceanb
+      // Horde controller and members appear under water but above pickups
       this.game.world.sendToBack(hordeController.members);
     });
 
-    // Send the controller itself under the ocean but above the horde
-    this.game.world.sendToBack(this.hordeControllers);
-
-    // Send the sand and algae to the bottom
-    // layer 0 = sand
-    // layer 1 = algae
-    this.game.world.sendToBack(this.bgLayer1);
-    this.game.world.sendToBack(this.bgLayer0);
+    this.game.world.sendToBack(this.pickups);
+    this.game.world.sendToBack(this.bgLayer1);        // Algae
+    this.game.world.sendToBack(this.bgLayer0);        // Sand and road
   }
 
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
-    this.hordeController = new HordeController(this.game, 4600, 400, 'sprite_hermy');
+    this.hordeController = new HordeController(this.game, 8000, 400, 'sprite_hermy');
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
     // Setup seagulls
-    this.seagullGroup = this.add.physicsGroup();
-    this.seagullGroup.add(new Seagull(this.game, 4600, 20, this.hordeController));
+    this.seagullGroup = this.add.group();
+    this.seagullGroup.add(new Seagull(this.game, 8000, 20, this.hordeController));
 
     // Setup enemy crab
     this.enemyCrabGroup = this.add.physicsGroup();
     this.enemyCrabGroup.add(new EnemyCrab(this.game, 4800, 100));
+
+    // Setup enemy crab
+    this.umbrellaGroup = this.add.physicsGroup();
+    this.umbrellaGroup.add(new Umbrella(this.game, 6920, 160));
+    this.umbrellaGroup.add(new Umbrella(this.game, 6920, 1080));
 
     // Setup the camera
     this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
@@ -127,6 +123,37 @@ export default class GamePlayState extends Phaser.State {
 
     // Player colliding with wave
     this.game.physics.arcade.collide(this.hordeControllers, this.waveGroup, this.waveCollision, null, this);
+
+    // Player colliding with wave
+    this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
+
+
+
+    // Check if seagull is colliding with horde but not umbrella
+    this.seagullGroup.forEach((seagull) => {
+      const seagullBound = seagull.getBounds();
+      const hordeBounds = this.hordeController.getBounds();
+
+      // Does this seagull overlap with the horde controller
+      const hordeSeagullCollision = Phaser.Rectangle.intersects(seagullBound, hordeBounds);
+
+      // Is this seagull on top of an umbrella
+      let umbrellaCollide = false;
+      this.umbrellaGroup.forEach((umbrella) => {
+        if (Phaser.Rectangle.intersects(seagullBound, umbrella.getBounds())) {
+          umbrellaCollide = true;
+        }
+      });
+
+      if (hordeSeagullCollision === true && umbrellaCollide === false) {
+        seagull.setLastCollision(this.totalTimeActive);
+
+        if (seagull.canAttack) {
+          seagull.canAttack = false;
+          this.hordeController.attacked();
+        }
+      }
+    });
   }
 
   cleanup() {
@@ -142,6 +169,7 @@ export default class GamePlayState extends Phaser.State {
       this.totalTimeActive = 0;
     }
     this.totalTimeActive += this.time.elapsed;
+    this.game.totalTimeActive = this.totalTimeActive;
   }
 
   pickupCollision(hordeController, pickup) {
@@ -156,6 +184,20 @@ export default class GamePlayState extends Phaser.State {
       hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y }
     } else {
       hordeController.targetLocked = false;
+    }
+  }
+
+  seagullUmbrellaCollision(umbrella, seagull) {
+    seagull.setLastCollision(this.totalTimeActive);
+  }
+
+  umbrellaCollision(hordeController, umbrella) {
+    umbrella.setLastCollision(this.totalTimeActive);
+  }
+
+  seagullCollision(hordeController, seagull) {
+    if (seagull.canAttack) {
+      hordeController.attacked();
     }
   }
 

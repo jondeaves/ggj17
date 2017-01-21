@@ -2,23 +2,35 @@ export default class MenuState extends Phaser.State {
   create() {
     // Just to get us started
     this.stage.backgroundColor = '#182d3b';
-    this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
+    this.stateBg = this.add.image(0, 0, 'bg_menu_screen');
     this.stateBg.width = this.game.width;
     this.stateBg.height = this.game.height;
 
-    console.log('menu state');
+    // Audio
+    this.menuSfx = this.game.add.audio('state_menu_music');
+    this.menuSfx.onDecoded.add(() => {
+      this.menuSfx.loopFull(0.6);
+    });
 
     // Gamepad
     this.game.input.gamepad.start();
     this.gamePad = this.game.input.gamepad.pad1;
-  }
 
-  update() {
+    this.hasFinished = false;
+
+
+    // Key bindings
     this.game.input.onTap.add(this.switchState, this);
 
     this.game.input.keyboard.onPressCallback = () => {
       this.switchState();
     };
+  }
+
+  update() {
+    if (this.hasFinished) {
+      return;
+    }
 
     //  We can't do this until we know that the gamepad has been connected and is started
     if (
@@ -34,6 +46,8 @@ export default class MenuState extends Phaser.State {
 
 
   switchState() {
+    this.hasFinished = true;
+    this.menuSfx.stop();
     this.state.start('GamePlayState', true, false);
   }
 }

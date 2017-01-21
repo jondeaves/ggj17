@@ -8,7 +8,27 @@
     }
   ],
 
-  "menuScreen": [],
+  "menuScreen": [
+    {
+      "type": "image",
+      "key": "bg_menu_screen",
+      "url": "./assets/menuScreen/bg_menu_screen.png",
+      "overwrite": false
+    },
+
+    {
+      "type": "audio",
+      "key": "state_menu_music",
+      "urls": ["./assets/audio/Music/state_menu_music.wav"],
+      "autoDecode": true
+    },
+    {
+      "type": "audio",
+      "key": "SFX_wave_triggered",
+      "urls": ["./assets/audio/SFX/SFX_wave_triggered.wav"],
+      "autoDecode": true
+    }
+  ],
 
   "gameplayScreen": [
     {
@@ -38,12 +58,6 @@
     },
     {
       "type": "image",
-      "key": "sprite_wave",
-      "url": "./assets/gameplayScreen/sprites/sprite_wave.png",
-      "overwrite": false
-    },
-    {
-      "type": "image",
       "key": "sprite_seagull",
       "url": "./assets/gameplayScreen/sprites/sprite_seagull.png",
       "overwrite": false
@@ -55,6 +69,14 @@
       "overwrite": false
     },
 
+    {
+      "type": "spritesheet",
+      "key": "sprite_wave",
+      "url": "./assets/gameplayScreen/sprites/sprite_wave.png",
+      "frameWidth": 2316,
+      "frameHeight": 2316,
+      "frameMax": 10
+    },
     {
       "type": "spritesheet",
       "key": "sprite_player",
@@ -132,12 +154,6 @@
       "type": "image",
       "key": "bg_victory_screen",
       "url": "./assets/victoryScreen/bg_victory_screen.png",
-      "overwrite": false
-    },
-    {
-      "type": "image",
-      "key": "overlay_victory_screen",
-      "url": "./assets/victoryScreen/overlay_victory_screen.png",
       "overwrite": false
     }
   ],

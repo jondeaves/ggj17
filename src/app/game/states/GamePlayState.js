@@ -26,8 +26,20 @@ export default class GamePlayState extends Phaser.State {
     this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
 
     // Audio
+    this.menuWaveSfx = this.game.add.audio('SFX_wave_triggered');
+    this.menuWaveSfx.onDecoded.add(() => {
+      this.menuWaveSfx.volume = 0.1;
+      this.menuWaveSfx.play();
+      this.menuWaveSfx.fadeOut(3000);
+    }, this);
+
     this.backgroundMusic = this.game.add.audio('state_walking_music');
-    this.backgroundMusic.loopFull(0.6);
+    this.backgroundMusic.onDecoded.add(() => {
+      setTimeout(() => {
+        this.backgroundMusic.loopFull(0);
+        this.backgroundMusic.fadeTo(4000, 0.4);
+      }, 3000);
+    }, this);
 
 
     // Sprite ordering
@@ -50,7 +62,8 @@ export default class GamePlayState extends Phaser.State {
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
-    this.hordeController = new HordeController(this.game, 8000, 400, 'sprite_hermy');
+    // this.hordeController = new HordeController(this.game, 8000, 400, 'sprite_hermy');
+    this.hordeController = new HordeController(this.game, 4600, 400, 'sprite_hermy');
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
@@ -74,7 +87,7 @@ export default class GamePlayState extends Phaser.State {
 
   generateWater() {
     this.waveGroup = this.add.physicsGroup();
-    this.waveGroup.add(new Wave(this.game, 50, 200));
+    this.waveGroup.add(new Wave(this.game, 1900, -290));
   }
 
   generatePickups() {

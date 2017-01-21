@@ -17,6 +17,12 @@
     },
     {
       "type": "image",
+      "key": "bg_water_overlay",
+      "url": "./assets/gameplayScreen/bg_water_overlay.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
       "key": "sprite_pickup_speed",
       "url": "./assets/gameplayScreen/sprites/sprite_pickup_speed.png",
       "overwrite": false
@@ -48,6 +54,14 @@
       "frameWidth": 95,
       "frameHeight": 57,
       "frameMax": 7
+    },
+    {
+      "type": "spritesheet",
+      "key": "sprite_hermy",
+      "url": "./assets/gameplayScreen/sprites/sprite_hermy.png",
+      "frameWidth": 259,
+      "frameHeight": 245,
+      "frameMax": 10
     }
   ],
 

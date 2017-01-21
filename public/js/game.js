@@ -101,7 +101,7 @@
 	  function Game() {
 	    _classCallCheck(this, Game);
 	
-	    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, _constants2.default.world.width, _constants2.default.world.height, Phaser.CANVAS, 'game_canvas', null));
+	    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, _constants2.default.world.resolution.width, _constants2.default.world.resolution.height, Phaser.CANVAS, 'game_canvas', null));
 	
 	    _this.state.add('BootState', _BootState2.default, false);
 	    _this.state.add('LoadingState', _LoadingState2.default);
@@ -156,8 +156,8 @@
 	      // Scale the game on smaller devices
 	      this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 	      this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
-	      this.game.scale.maxWidth = this.game.constants.world.width;
-	      this.game.scale.maxHeight = this.game.constants.world.height;
+	      this.game.scale.maxWidth = this.game.constants.world.resolution.width;
+	      this.game.scale.maxHeight = this.game.constants.world.resolution.height;
 	      this.game.scale.forceLandscape = true;
 	      this.game.scale.pageAlignHorizontally = true;
 	      this.game.scale.refresh();
@@ -299,11 +299,12 @@
 	  _createClass(GamePlayState, [{
 	    key: 'create',
 	    value: function create() {
+	      var _this2 = this;
+	
 	      this.stage.backgroundColor = '#9c7c63';
 	
-	      this.stateBg = this.add.image(0, 0, 'bg_gameplay_screen');
-	      this.stateBg.width = this.game.width;
-	      this.stateBg.height = this.game.height;
+	      this.baseLayer = this.add.image(0, 0, 'bg_gameplay_screen');
+	      this.waterLayer = this.add.image(0, 0, 'bg_water_overlay');
 	
 	      // Generate the world as it begins
 	      this.generateWorld();
@@ -313,22 +314,35 @@
 	      // Physics
 	      this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	      this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
+	
+	      // Sprite ordering
+	      this.game.world.sendToBack(this.seagullGroup);
+	      this.game.world.sendToBack(this.waveGroup);
+	      this.game.world.sendToBack(this.waterLayer);
+	      this.game.world.sendToBack(this.pickups);
+	
+	      this.hordeControllers.forEach(function (hordeController) {
+	        _this2.game.world.sendToBack(hordeController.members);
+	      });
+	
+	      this.game.world.sendToBack(this.hordeControllers);
+	      this.game.world.sendToBack(this.baseLayer);
 	    }
 	  }, {
 	    key: 'generateWorld',
 	    value: function generateWorld() {
 	      // Setup the horde
 	      this.hordeControllers = this.add.physicsGroup();
-	      this.hordeController = new _HordeController2.default(this.game, 450, 150, 'sprite_player');
+	      this.hordeController = new _HordeController2.default(this.game, 4600, 400, 'sprite_hermy');
 	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
 	      // Setup seagulls
 	      this.seagullGroup = this.add.physicsGroup();
-	      this.seagullGroup.add(new _Seagull2.default(this.game, 20, 20, this.hordeController));
+	      this.seagullGroup.add(new _Seagull2.default(this.game, 4600, 20, this.hordeController));
 	
 	      // Setup the camera
-	      this.game.world.setBounds(null);
+	      this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
 	      this.game.camera.follow(this.hordeController);
 	    }
 	  }, {
@@ -364,7 +378,7 @@
 	  }, {
 	    key: 'update',
 	    value: function update() {
-	      var _this2 = this;
+	      var _this3 = this;
 	
 	      this.updateTimer();
 	
@@ -375,7 +389,7 @@
 	
 	      // Physics
 	      this.seagullGroup.forEach(function (gull) {
-	        gull.updateHordeControllers(_this2.hordeControllers);
+	        gull.updateHordeControllers(_this3.hordeControllers);
 	      });
 	
 	      // Player colliding with pickups
@@ -387,10 +401,10 @@
 	  }, {
 	    key: 'cleanup',
 	    value: function cleanup() {
-	      var _this3 = this;
+	      var _this4 = this;
 	
 	      this.seagullGroup.forEach(function (seagull) {
-	        if (seagull.x >= _this3.game.width || seagull.y >= _this3.game.height) {
+	        if (seagull.x >= _this4.game.constants.world.bounds.width || seagull.y >= _this4.game.constants.world.bounds.height) {
 	          seagull.destroy();
 	        }
 	      });
@@ -423,18 +437,18 @@
 	  }, {
 	    key: 'spawnPickups',
 	    value: function spawnPickups() {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      if (this.pickupTimer >= this.pickupTimeBetween) {
 	        (function () {
-	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this4.pickupDefinitions.length - 1);
-	          var pickupIndex = _lodash2.default.findIndex(_this4.pickupDefinitions, function (o) {
+	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this5.pickupDefinitions.length - 1);
+	          var pickupIndex = _lodash2.default.findIndex(_this5.pickupDefinitions, function (o) {
 	            return o.id === pickupIdent;
 	          });
-	          var generatedPickup = _this4.pickupDefinitions[pickupIndex];
+	          var generatedPickup = _this5.pickupDefinitions[pickupIndex];
 	
-	          _this4.pickups.add(new _Pickup2.default(_this4.game, 500, 200, generatedPickup));
-	          _this4.pickupTimer = 0.0;
+	          _this5.pickups.add(new _Pickup2.default(_this5.game, 500, 200, generatedPickup));
+	          _this5.pickupTimer = 0.0;
 	        })();
 	      }
 	
@@ -17567,8 +17581,14 @@
 	exports.default = {
 	
 	  world: {
-	    width: 1280,
-	    height: 720,
+	    resolution: {
+	      width: 1920,
+	      height: 1080
+	    },
+	    bounds: {
+	      width: 7500,
+	      height: 1755
+	    },
 	    boundOffset: 50
 	  }
 	
@@ -18027,6 +18047,7 @@
 	    // Phaser data
 	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, x, y, asset, 5));
 	
+	    _this.scale.setTo(0.4, 0.4);
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
@@ -18038,7 +18059,7 @@
 	    _this.play('right');
 	
 	    // Setup members of horde
-	    _this.members = _this.game.add.group();
+	    _this.members = _this.game.add.physicsGroup();
 	
 	    // Add input keys
 	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
@@ -18070,7 +18091,7 @@
 	      var iHorde = 0;
 	
 	      for (iHorde; iHorde < count; iHorde += 1) {
-	        this.members.add(new _HordeMember2.default(this.game, 'sprite_crab', this));
+	        this.members.add(new _HordeMember2.default(this.game, 'sprite_hermy', this, 0.4));
 	      }
 	    }
 	  }, {
@@ -18200,7 +18221,7 @@
 	var HordeController = function (_Phaser$Sprite) {
 	  _inherits(HordeController, _Phaser$Sprite);
 	
-	  function HordeController(game, asset, hordeController) {
+	  function HordeController(game, asset, hordeController, scale) {
 	    _classCallCheck(this, HordeController);
 	
 	    //  Enable Arcade Physics for the sprite
@@ -18209,6 +18230,7 @@
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	
 	    // Phaser data
+	    _this.scale.setTo(scale, scale);
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
 	    _this.moveSpeed = 5;

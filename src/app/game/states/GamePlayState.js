@@ -9,9 +9,9 @@ export default class GamePlayState extends Phaser.State {
   create() {
     this.stage.backgroundColor = '#9c7c63';
 
-    this.stateBg = this.add.image(0, 0, 'bg_gameplay_screen');
-    this.stateBg.width = this.game.width;
-    this.stateBg.height = this.game.height;
+    this.baseLayer = this.add.image(0, 0, 'bg_gameplay_screen');
+    this.waterLayer = this.add.image(0, 0, 'bg_water_overlay');
+
 
     // Generate the world as it begins
     this.generateWorld();
@@ -21,21 +21,34 @@ export default class GamePlayState extends Phaser.State {
     // Physics
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
+
+    // Sprite ordering
+    this.game.world.sendToBack(this.seagullGroup);
+    this.game.world.sendToBack(this.waveGroup);
+    this.game.world.sendToBack(this.waterLayer);
+    this.game.world.sendToBack(this.pickups);
+
+    this.hordeControllers.forEach((hordeController) => {
+      this.game.world.sendToBack(hordeController.members);
+    });
+
+    this.game.world.sendToBack(this.hordeControllers);
+    this.game.world.sendToBack(this.baseLayer);
   }
 
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
-    this.hordeController = new HordeController(this.game, 450, 150, 'sprite_player');
+    this.hordeController = new HordeController(this.game, 4600, 400, 'sprite_hermy');
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
     // Setup seagulls
     this.seagullGroup = this.add.physicsGroup();
-    this.seagullGroup.add(new Seagull(this.game, 20, 20, this.hordeController));
+    this.seagullGroup.add(new Seagull(this.game, 4600, 20, this.hordeController));
 
     // Setup the camera
-    this.game.world.setBounds(null);
+    this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
     this.game.camera.follow(this.hordeController);
   }
 
@@ -92,7 +105,7 @@ export default class GamePlayState extends Phaser.State {
 
   cleanup() {
     this.seagullGroup.forEach((seagull) => {
-      if (seagull.x >= this.game.width || seagull.y >= this.game.height) {
+      if (seagull.x >= this.game.constants.world.bounds.width || seagull.y >= this.game.constants.world.bounds.height) {
         seagull.destroy();
       }
     });

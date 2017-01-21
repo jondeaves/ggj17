@@ -8,8 +8,8 @@ export default class BootState extends Phaser.State {
     // Scale the game on smaller devices
     this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
-    this.game.scale.maxWidth = this.game.constants.world.width;
-    this.game.scale.maxHeight = this.game.constants.world.height;
+    this.game.scale.maxWidth = this.game.constants.world.resolution.width;
+    this.game.scale.maxHeight = this.game.constants.world.resolution.height;
     this.game.scale.forceLandscape = true;
     this.game.scale.pageAlignHorizontally = true;
     this.game.scale.refresh();

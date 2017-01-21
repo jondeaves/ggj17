@@ -7,6 +7,7 @@ export default class HordeController extends Phaser.Sprite {
     super(game, x, y, asset, 5);
 
     // Phaser data
+    this.scale.setTo(0.4, 0.4);
     this.game = game;
     this.anchor.setTo(0.5);
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -18,7 +19,7 @@ export default class HordeController extends Phaser.Sprite {
     this.play('right');
 
     // Setup members of horde
-    this.members = this.game.add.group();
+    this.members = this.game.add.physicsGroup();
 
     // Add input keys
     this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -49,8 +50,9 @@ export default class HordeController extends Phaser.Sprite {
     for (iHorde; iHorde < count; iHorde += 1) {
       this.members.add(new HordeMember(
         this.game,
-        'sprite_crab',
+        'sprite_hermy',
         this,
+        0.4,
       ));
     }
   }

@@ -1,9 +1,15 @@
 export default {
 
   world: {
-    width: 1280,
-    height: 720,
-    boundOffset: 50
-  }
+    resolution: {
+      width: 1920,
+      height: 1080,
+    },
+    bounds: {
+      width: 7500,
+      height: 1755,
+    },
+    boundOffset: 50,
+  },
 
 };

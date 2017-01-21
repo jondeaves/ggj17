@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { getRandomInt } from '../helpers';
 import HordeController from '../objects/HordeController';
+import EnemyCrab from '../objects/EnemyCrab';
 import Wave from '../objects/Wave';
 import Pickup from '../objects/Pickup';
 import Seagull from '../objects/Seagull';
@@ -9,8 +10,10 @@ export default class GamePlayState extends Phaser.State {
   create() {
     this.stage.backgroundColor = '#9c7c63';
 
-    this.baseLayer = this.add.image(0, 0, 'bg_gameplay_screen');
-    this.waterLayer = this.add.image(0, 0, 'bg_water_overlay');
+    this.bgLayer0 = this.add.image(0, 0, 'sprite_bg_layer_0');
+    this.bgLayer1 = this.add.image(0, 0, 'sprite_bg_layer_1');
+    this.bgLayer2 = this.add.image(0, 0, 'sprite_bg_layer_2');
+    this.bgLayer3 = this.add.image(0, 0, 'sprite_bg_layer_3');
 
 
     // Generate the world as it begins
@@ -22,18 +25,35 @@ export default class GamePlayState extends Phaser.State {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
 
+    // Audio
+    this.backgroundMusic = this.game.add.audio('state_walking_music');
+    this.backgroundMusic.loopFull(0.6);
+
     // Sprite ordering
     this.game.world.sendToBack(this.seagullGroup);
     this.game.world.sendToBack(this.waveGroup);
-    this.game.world.sendToBack(this.waterLayer);
     this.game.world.sendToBack(this.pickups);
 
+
+    // Make sure crabs go underwater and under the umbrellas
+    // layer 2 = water
+    // layer 3 = umbrellas
+    this.game.world.sendToBack(this.bgLayer3);
+    this.game.world.sendToBack(this.bgLayer2);
+
     this.hordeControllers.forEach((hordeController) => {
+      // Send each member of the horde under the oceanb
       this.game.world.sendToBack(hordeController.members);
     });
 
+    // Send the controller itself under the ocean but above the horde
     this.game.world.sendToBack(this.hordeControllers);
-    this.game.world.sendToBack(this.baseLayer);
+
+    // Send the sand and algae to the bottom
+    // layer 0 = sand
+    // layer 1 = algae
+    this.game.world.sendToBack(this.bgLayer1);
+    this.game.world.sendToBack(this.bgLayer0);
   }
 
   generateWorld() {
@@ -46,6 +66,10 @@ export default class GamePlayState extends Phaser.State {
     // Setup seagulls
     this.seagullGroup = this.add.physicsGroup();
     this.seagullGroup.add(new Seagull(this.game, 4600, 20, this.hordeController));
+
+    // Setup enemy crab
+    this.enemyCrabGroup = this.add.physicsGroup();
+    this.enemyCrabGroup.add(new EnemyCrab(this.game, 4800, 100));
 
     // Setup the camera
     this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
@@ -70,7 +94,8 @@ export default class GamePlayState extends Phaser.State {
         modifier: 'moveSpeed',
         value: 5,
         duration: 5000,
-        asset: 'sprite_pickup_speed',
+        asset: 'sprite_pickup_shelly',
+        scale: 0.3,
       },
       {
         id: 1,
@@ -78,7 +103,8 @@ export default class GamePlayState extends Phaser.State {
         modifier: 'moveSpeed',
         value: -2,
         duration: 3000,
-        asset: 'sprite_pickup_speed',
+        asset: 'sprite_pickup_shelly',
+        scale: 0.3,
       },
     ];
   }
@@ -139,7 +165,7 @@ export default class GamePlayState extends Phaser.State {
       const pickupIndex = _.findIndex(this.pickupDefinitions, o => o.id === pickupIdent);
       const generatedPickup = this.pickupDefinitions[pickupIndex];
 
-      this.pickups.add(new Pickup(this.game, 500, 200, generatedPickup));
+      this.pickups.add(new Pickup(this.game, 4600, 200, generatedPickup));
       this.pickupTimer = 0.0;
     }
 

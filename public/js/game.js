@@ -52,7 +52,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	__webpack_require__(9);
+	__webpack_require__(15);
 	
 	// eslint-disable-next-line no-unused-vars
 	var game = new _game2.default();
@@ -75,15 +75,15 @@
 	
 	var _LoadingState2 = _interopRequireDefault(_LoadingState);
 	
-	var _SplashState = __webpack_require__(13);
+	var _SplashState = __webpack_require__(4);
 	
 	var _SplashState2 = _interopRequireDefault(_SplashState);
 	
-	var _GamePlayState = __webpack_require__(4);
+	var _GamePlayState = __webpack_require__(5);
 	
 	var _GamePlayState2 = _interopRequireDefault(_GamePlayState);
 	
-	var _constants = __webpack_require__(8);
+	var _constants = __webpack_require__(14);
 	
 	var _constants2 = _interopRequireDefault(_constants);
 	
@@ -247,6 +247,76 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var SplashState = function (_Phaser$State) {
+	  _inherits(SplashState, _Phaser$State);
+	
+	  function SplashState() {
+	    _classCallCheck(this, SplashState);
+	
+	    return _possibleConstructorReturn(this, (SplashState.__proto__ || Object.getPrototypeOf(SplashState)).apply(this, arguments));
+	  }
+	
+	  _createClass(SplashState, [{
+	    key: 'init',
+	    value: function init(sessionManager) {
+	      this.sessionManager = sessionManager;
+	    }
+	  }, {
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.updateTimer();
+	
+	      if (this.totalTimeActive > 3000) {
+	        this.splashComplete();
+	      }
+	    }
+	  }, {
+	    key: 'updateTimer',
+	    value: function updateTimer() {
+	      if (typeof this.totalTimeActive === 'undefined') {
+	        this.totalTimeActive = 0;
+	      }
+	      this.totalTimeActive += this.time.elapsed;
+	    }
+	  }, {
+	    key: 'splashComplete',
+	    value: function splashComplete() {
+	      this.state.start('GamePlayState', true, false);
+	    }
+	  }]);
+	
+	  return SplashState;
+	}(Phaser.State);
+	
+	exports.default = SplashState;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -257,25 +327,29 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _lodash = __webpack_require__(5);
+	var _lodash = __webpack_require__(6);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _helpers = __webpack_require__(16);
+	var _helpers = __webpack_require__(8);
 	
-	var _HordeController = __webpack_require__(14);
+	var _HordeController = __webpack_require__(9);
 	
 	var _HordeController2 = _interopRequireDefault(_HordeController);
 	
-	var _Wave = __webpack_require__(18);
+	var _EnemyCrab = __webpack_require__(19);
+	
+	var _EnemyCrab2 = _interopRequireDefault(_EnemyCrab);
+	
+	var _Wave = __webpack_require__(11);
 	
 	var _Wave2 = _interopRequireDefault(_Wave);
 	
-	var _Pickup = __webpack_require__(17);
+	var _Pickup = __webpack_require__(12);
 	
 	var _Pickup2 = _interopRequireDefault(_Pickup);
 	
-	var _Seagull = __webpack_require__(19);
+	var _Seagull = __webpack_require__(13);
 	
 	var _Seagull2 = _interopRequireDefault(_Seagull);
 	
@@ -303,8 +377,10 @@
 	
 	      this.stage.backgroundColor = '#9c7c63';
 	
-	      this.baseLayer = this.add.image(0, 0, 'bg_gameplay_screen');
-	      this.waterLayer = this.add.image(0, 0, 'bg_water_overlay');
+	      this.bgLayer0 = this.add.image(0, 0, 'sprite_bg_layer_0');
+	      this.bgLayer1 = this.add.image(0, 0, 'sprite_bg_layer_1');
+	      this.bgLayer2 = this.add.image(0, 0, 'sprite_bg_layer_2');
+	      this.bgLayer3 = this.add.image(0, 0, 'sprite_bg_layer_3');
 	
 	      // Generate the world as it begins
 	      this.generateWorld();
@@ -315,18 +391,34 @@
 	      this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	      this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
 	
+	      // Audio
+	      this.backgroundMusic = this.game.add.audio('state_walking_music');
+	      this.backgroundMusic.loopFull(0.6);
+	
 	      // Sprite ordering
 	      this.game.world.sendToBack(this.seagullGroup);
 	      this.game.world.sendToBack(this.waveGroup);
-	      this.game.world.sendToBack(this.waterLayer);
 	      this.game.world.sendToBack(this.pickups);
 	
+	      // Make sure crabs go underwater and under the umbrellas
+	      // layer 2 = water
+	      // layer 3 = umbrellas
+	      this.game.world.sendToBack(this.bgLayer3);
+	      this.game.world.sendToBack(this.bgLayer2);
+	
 	      this.hordeControllers.forEach(function (hordeController) {
+	        // Send each member of the horde under the oceanb
 	        _this2.game.world.sendToBack(hordeController.members);
 	      });
 	
+	      // Send the controller itself under the ocean but above the horde
 	      this.game.world.sendToBack(this.hordeControllers);
-	      this.game.world.sendToBack(this.baseLayer);
+	
+	      // Send the sand and algae to the bottom
+	      // layer 0 = sand
+	      // layer 1 = algae
+	      this.game.world.sendToBack(this.bgLayer1);
+	      this.game.world.sendToBack(this.bgLayer0);
 	    }
 	  }, {
 	    key: 'generateWorld',
@@ -340,6 +432,10 @@
 	      // Setup seagulls
 	      this.seagullGroup = this.add.physicsGroup();
 	      this.seagullGroup.add(new _Seagull2.default(this.game, 4600, 20, this.hordeController));
+	
+	      // Setup enemy crab
+	      this.enemyCrabGroup = this.add.physicsGroup();
+	      this.enemyCrabGroup.add(new _EnemyCrab2.default(this.game, 4800, 100));
 	
 	      // Setup the camera
 	      this.game.world.setBounds(0, 0, this.game.constants.world.bounds.width, this.game.constants.world.bounds.height);
@@ -365,14 +461,16 @@
 	        modifier: 'moveSpeed',
 	        value: 5,
 	        duration: 5000,
-	        asset: 'sprite_pickup_speed'
+	        asset: 'sprite_pickup_shelly',
+	        scale: 0.3
 	      }, {
 	        id: 1,
 	        ident: 'rubbish',
 	        modifier: 'moveSpeed',
 	        value: -2,
 	        duration: 3000,
-	        asset: 'sprite_pickup_speed'
+	        asset: 'sprite_pickup_shelly',
+	        scale: 0.3
 	      }];
 	    }
 	  }, {
@@ -447,7 +545,7 @@
 	          });
 	          var generatedPickup = _this5.pickupDefinitions[pickupIndex];
 	
-	          _this5.pickups.add(new _Pickup2.default(_this5.game, 500, 200, generatedPickup));
+	          _this5.pickups.add(new _Pickup2.default(_this5.game, 4600, 200, generatedPickup));
 	          _this5.pickupTimer = 0.0;
 	        })();
 	      }
@@ -462,7 +560,7 @@
 	exports.default = GamePlayState;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -17550,10 +17648,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(6)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(7)(module)))
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -17569,8 +17667,509 @@
 
 
 /***/ },
-/* 7 */,
 /* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.toRadians = toRadians;
+	exports.toDegrees = toDegrees;
+	exports.getRandomArbitrary = getRandomArbitrary;
+	exports.getRandomInt = getRandomInt;
+	exports.turnToAngle = turnToAngle;
+	exports.turnToFace = turnToFace;
+	function toRadians(angle) {
+	  return angle * (Math.PI / 180);
+	}
+	
+	function toDegrees(radians) {
+	  return radians * (180 / Math.PI);
+	}
+	
+	function getRandomArbitrary(min, max) {
+	  return Math.random() * (max - min) + min;
+	}
+	
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomInt(min, max) {
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	
+	function turnToAngle(game, currentAngle, targetAngle, rotationSpeed) {
+	  var difference = targetAngle - currentAngle;
+	
+	  if (difference > game.math.PI) {
+	    difference = 2 * game.math - difference;
+	  } else if (difference < -game.math.PI) {
+	    difference = 2 * game.math + difference;
+	  }
+	
+	  // Move the character's rotation a set amount per unit time
+	  var delta = difference < 0 ? -rotationSpeed : rotationSpeed;
+	  return delta * game.time.elapsed;
+	}
+	
+	function turnToFace(game, obj1, obj2, rotationSpeed) {
+	  var targetAngle = game.math.angleBetween(obj1.x, obj1.y, obj2.x, obj2.y);
+	  obj1.rotation = targetAngle;
+	  // const rotateDiff = turnToAngle(game, obj1.body.rotation, targetAngle, rotationSpeed);
+	  // console.log(rotateDiff);
+	  //
+	  // obj1.rotation += rotateDiff;
+	}
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(8);
+	
+	var _HordeMember = __webpack_require__(10);
+	
+	var _HordeMember2 = _interopRequireDefault(_HordeMember);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var HordeController = function (_Phaser$Sprite) {
+	  _inherits(HordeController, _Phaser$Sprite);
+	
+	  function HordeController(game, x, y, asset) {
+	    _classCallCheck(this, HordeController);
+	
+	    // Phaser data
+	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, x, y, asset, 5));
+	
+	    _this.scale.setTo(0.4, 0.4);
+	    _this.game = game;
+	    _this.anchor.setTo(0.5);
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    _this.body.setSize(30, 30, 46, 46);
+	
+	    // Setup animation
+	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
+	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
+	    _this.play('right');
+	
+	    // Setup members of horde
+	    _this.members = _this.game.add.physicsGroup();
+	
+	    // Add input keys
+	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
+	    _this.wKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.W);
+	    _this.aKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.A);
+	    _this.sKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.S);
+	    _this.dKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.D);
+	
+	    // Gamepad
+	    _this.game.input.gamepad.start();
+	    _this.gamePad = _this.game.input.gamepad.pad1;
+	
+	    // Setup movement of hordes
+	    _this.movementTimer = 0.0;
+	    _this.timeBetweenMovements = 160.0;
+	
+	    // Modifiers, pickups
+	    _this.modifiers = {
+	      moveSpeed: 5
+	    };
+	    _this.targetLocked = false;
+	    _this.targetLockedPreviousPos = { x: 0, y: 0 };
+	    return _this;
+	  }
+	
+	  _createClass(HordeController, [{
+	    key: 'addToHorde',
+	    value: function addToHorde(count) {
+	      var iHorde = 0;
+	
+	      for (iHorde; iHorde < count; iHorde += 1) {
+	        this.members.add(new _HordeMember2.default(this.game, 'sprite_hermy', this, 0.4));
+	      }
+	    }
+	  }, {
+	    key: 'applyPickup',
+	    value: function applyPickup(pickup) {
+	      var _this2 = this;
+	
+	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+	        this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
+	      }
+	
+	      // Kill the pickup after the time
+	      setTimeout(function () {
+	        return _this2.destroyPickup(pickup);
+	      }, pickup.attributes.duration);
+	    }
+	  }, {
+	    key: 'destroyPickup',
+	    value: function destroyPickup(pickup) {
+	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+	        this.modifiers[pickup.attributes.modifier] -= pickup.attributes.value;
+	      }
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.updateInput();
+	      this.updateHorde();
+	    }
+	  }, {
+	    key: 'updateHorde',
+	    value: function updateHorde() {
+	      var _this3 = this;
+	
+	      var angle = 0;
+	      var radius = 100;
+	
+	      if (this.movementTimer >= this.timeBetweenMovements) {
+	        this.members.forEach(function (member) {
+	          var iRadius = radius + (0, _helpers.getRandomArbitrary)(-20, 20);
+	
+	          // Move player to new position
+	          member.setMovementInfo(iRadius, angle);
+	
+	          // Increment angle by random amount
+	          var baseAngleIncrease = 360 / _this3.members.length;
+	          angle += baseAngleIncrease + (0, _helpers.getRandomArbitrary)(5, 20);
+	        });
+	
+	        this.movementTimer = 0.0;
+	      }
+	
+	      this.movementTimer += this.game.time.elapsed;
+	    }
+	  }, {
+	    key: 'updateInput',
+	    value: function updateInput() {
+	      if (this.targetLocked !== false) {
+	        if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
+	          this.x += this.targetLocked.moveSpeed;
+	        }
+	
+	        this.targetLockedPreviousPos = { x: this.targetLocked.x, y: this.targetLocked.y };
+	        return;
+	      }
+	
+	      // Movement
+	      if (this.moveUp()) {
+	        this.y -= this.modifiers.moveSpeed;
+	      } else if (this.moveDown()) {
+	        this.y += this.modifiers.moveSpeed;
+	      }
+	
+	      if (this.moveLeft()) {
+	        this.x -= this.modifiers.moveSpeed;
+	      } else if (this.moveRight()) {
+	        this.x += this.modifiers.moveSpeed;
+	      }
+	    }
+	  }, {
+	    key: 'moveUp',
+	    value: function moveUp() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_UP) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) < -0.1 || this.wKey.isDown === true || this.cursors.up.isDown;
+	    }
+	  }, {
+	    key: 'moveRight',
+	    value: function moveRight() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_RIGHT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.1 || this.dKey.isDown === true || this.cursors.right.isDown;
+	    }
+	  }, {
+	    key: 'moveDown',
+	    value: function moveDown() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_DOWN) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) > 0.1 || this.sKey.isDown === true || this.cursors.down.isDown;
+	    }
+	  }, {
+	    key: 'moveLeft',
+	    value: function moveLeft() {
+	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_LEFT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.1 || this.aKey.isDown === true || this.cursors.left.isDown;
+	    }
+	  }]);
+	
+	  return HordeController;
+	}(Phaser.Sprite);
+	
+	exports.default = HordeController;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(8);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var HordeController = function (_Phaser$Sprite) {
+	  _inherits(HordeController, _Phaser$Sprite);
+	
+	  function HordeController(game, asset, hordeController, scale) {
+	    _classCallCheck(this, HordeController);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, hordeController.x, hordeController.y, asset, 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    // Phaser data
+	    _this.scale.setTo(scale, scale);
+	    _this.game = game;
+	    _this.anchor.setTo(0.5);
+	    _this.moveSpeed = 5;
+	
+	    _this.hordeController = hordeController;
+	
+	    // Setup animation
+	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
+	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
+	    _this.play('right');
+	    return _this;
+	  }
+	
+	  _createClass(HordeController, [{
+	    key: 'update',
+	    value: function update() {
+	      this.x = this.hordeController.x + this.radius * Math.cos((0, _helpers.toRadians)(this.angle));
+	      this.y = this.hordeController.y + this.radius * Math.sin((0, _helpers.toRadians)(this.angle));
+	    }
+	  }, {
+	    key: 'setMovementInfo',
+	    value: function setMovementInfo(radius, angle) {
+	      this.radius = radius;
+	      this.angle = angle;
+	    }
+	  }]);
+	
+	  return HordeController;
+	}(Phaser.Sprite);
+	
+	exports.default = HordeController;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Wave = function (_Phaser$Sprite) {
+	  _inherits(Wave, _Phaser$Sprite);
+	
+	  function Wave(game, x, y) {
+	    _classCallCheck(this, Wave);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, game, x, y, 'sprite_wave', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    _this.moveSpeed = 0.8;
+	    _this.isMovingTowardLand = true;
+	    _this.moveTimer = 0.0;
+	    _this.totalMovingTime = 1800;
+	    return _this;
+	  }
+	
+	  _createClass(Wave, [{
+	    key: 'update',
+	    value: function update() {
+	      if (this.isMovingTowardLand) {
+	        this.x += this.moveSpeed;
+	      } else {
+	        this.x -= this.moveSpeed;
+	      }
+	
+	      if (this.moveTimer >= this.totalMovingTime) {
+	        this.isMovingTowardLand = !this.isMovingTowardLand;
+	        this.moveTimer = 0;
+	      }
+	      this.moveTimer += this.game.time.elapsed;
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {}
+	  }]);
+	
+	  return Wave;
+	}(Phaser.Sprite);
+	
+	exports.default = Wave;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Pickup = function (_Phaser$Sprite) {
+	  _inherits(Pickup, _Phaser$Sprite);
+	
+	  /**
+	   * TTL is number of milliseconds the pickup lives for
+	   * Movespeed should be set only if this pickup affects movespeed
+	   */
+	  function Pickup(game, x, y, attr) {
+	    _classCallCheck(this, Pickup);
+	
+	    var _this = _possibleConstructorReturn(this, (Pickup.__proto__ || Object.getPrototypeOf(Pickup)).call(this, game, x, y, attr.asset, 5));
+	
+	    _this.attributes = attr;
+	
+	    // Scale asset
+	    _this.scale.setTo(attr.scale, attr.scale);
+	
+	    //  Enable Arcade Physics for the sprite
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    return _this;
+	  }
+	
+	  return Pickup;
+	}(Phaser.Sprite);
+	
+	exports.default = Pickup;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(8);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Seagull = function (_Phaser$Sprite) {
+	  _inherits(Seagull, _Phaser$Sprite);
+	
+	  function Seagull(game, x, y, hordeControllers) {
+	    _classCallCheck(this, Seagull);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (Seagull.__proto__ || Object.getPrototypeOf(Seagull)).call(this, game, x, y, 'sprite_seagull', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    //  Tell it we don't want physics to manage the rotation
+	    _this.rotation = _this.game.physics.arcade.angleBetween(_this, {
+	      x: _this.game.width / 2,
+	      y: _this.game.height / 2
+	    });
+	
+	    // Do we have anything we want to move towards?
+	    _this.target = null;
+	    _this.hordeControllers = hordeControllers;
+	
+	    _this.lostTargetTimer = 0;
+	    return _this;
+	  }
+	
+	  _createClass(Seagull, [{
+	    key: 'changeTarget',
+	    value: function changeTarget(target) {
+	      this.target = target;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      if (this.lostTargetTimer > 0) {
+	        this.lostTargetTimer -= this.game.time.elapsed;
+	      }
+	
+	      if (this.target === null) {
+	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+	
+	        // Without a target search for one
+	        if (this.lostTargetTimer <= 0 && typeof this.hordeControllers !== 'undefined' && this.hordeControllers.length > 0 && this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= 350) {
+	          this.lostTargetTimer = 0;
+	          this.changeTarget(this.hordeControllers.getChildAt(0));
+	        }
+	      } else if (this.target !== null) {
+	        this.rotation = this.game.physics.arcade.moveToObject(this, this.target, 240);
+	
+	        // Lose target if too close, stopped rapid spinning
+	        if (this.game.physics.arcade.distanceBetween(this, this.target) <= 20) {
+	          this.lostTargetTimer = 3000.0;
+	          this.changeTarget(null);
+	        }
+	      } else {
+	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+	      }
+	    }
+	  }, {
+	    key: 'updateHordeControllers',
+	    value: function updateHordeControllers(hordeControllers) {
+	      this.hordeControllers = hordeControllers;
+	    }
+	  }]);
+	
+	  return Seagull;
+	}(Phaser.Sprite);
+	
+	exports.default = Seagull;
+
+/***/ },
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -17595,16 +18194,16 @@
 	};
 
 /***/ },
-/* 9 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(10);
+	var content = __webpack_require__(16);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(12)(content, {});
+	var update = __webpack_require__(18)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -17621,10 +18220,10 @@
 	}
 
 /***/ },
-/* 10 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(11)();
+	exports = module.exports = __webpack_require__(17)();
 	// imports
 	
 	
@@ -17635,7 +18234,7 @@
 
 
 /***/ },
-/* 11 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/*
@@ -17691,7 +18290,7 @@
 
 
 /***/ },
-/* 12 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -17943,488 +18542,8 @@
 
 
 /***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var SplashState = function (_Phaser$State) {
-	  _inherits(SplashState, _Phaser$State);
-	
-	  function SplashState() {
-	    _classCallCheck(this, SplashState);
-	
-	    return _possibleConstructorReturn(this, (SplashState.__proto__ || Object.getPrototypeOf(SplashState)).apply(this, arguments));
-	  }
-	
-	  _createClass(SplashState, [{
-	    key: 'init',
-	    value: function init(sessionManager) {
-	      this.sessionManager = sessionManager;
-	    }
-	  }, {
-	    key: 'create',
-	    value: function create() {
-	      // Just to get us started
-	      this.stage.backgroundColor = '#182d3b';
-	      this.stateBg = this.add.image(0, 0, 'bg_splash_screen');
-	      this.stateBg.width = this.game.width;
-	      this.stateBg.height = this.game.height;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      this.updateTimer();
-	
-	      if (this.totalTimeActive > 3000) {
-	        this.splashComplete();
-	      }
-	    }
-	  }, {
-	    key: 'updateTimer',
-	    value: function updateTimer() {
-	      if (typeof this.totalTimeActive === 'undefined') {
-	        this.totalTimeActive = 0;
-	      }
-	      this.totalTimeActive += this.time.elapsed;
-	    }
-	  }, {
-	    key: 'splashComplete',
-	    value: function splashComplete() {
-	      this.state.start('GamePlayState', true, false);
-	    }
-	  }]);
-	
-	  return SplashState;
-	}(Phaser.State);
-	
-	exports.default = SplashState;
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _helpers = __webpack_require__(16);
-	
-	var _HordeMember = __webpack_require__(15);
-	
-	var _HordeMember2 = _interopRequireDefault(_HordeMember);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var HordeController = function (_Phaser$Sprite) {
-	  _inherits(HordeController, _Phaser$Sprite);
-	
-	  function HordeController(game, x, y, asset) {
-	    _classCallCheck(this, HordeController);
-	
-	    // Phaser data
-	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, x, y, asset, 5));
-	
-	    _this.scale.setTo(0.4, 0.4);
-	    _this.game = game;
-	    _this.anchor.setTo(0.5);
-	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-	    _this.body.setSize(10, 10, 46, 46);
-	
-	    // Setup animation
-	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-	    _this.play('right');
-	
-	    // Setup members of horde
-	    _this.members = _this.game.add.physicsGroup();
-	
-	    // Add input keys
-	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
-	    _this.wKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.W);
-	    _this.aKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.A);
-	    _this.sKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.S);
-	    _this.dKey = _this.game.input.keyboard.addKey(Phaser.Keyboard.D);
-	
-	    // Gamepad
-	    _this.game.input.gamepad.start();
-	    _this.gamePad = _this.game.input.gamepad.pad1;
-	
-	    // Setup movement of hordes
-	    _this.movementTimer = 0.0;
-	    _this.timeBetweenMovements = 160.0;
-	
-	    // Modifiers, pickups
-	    _this.modifiers = {
-	      moveSpeed: 5
-	    };
-	    _this.targetLocked = false;
-	    _this.targetLockedPreviousPos = { x: 0, y: 0 };
-	    return _this;
-	  }
-	
-	  _createClass(HordeController, [{
-	    key: 'addToHorde',
-	    value: function addToHorde(count) {
-	      var iHorde = 0;
-	
-	      for (iHorde; iHorde < count; iHorde += 1) {
-	        this.members.add(new _HordeMember2.default(this.game, 'sprite_hermy', this, 0.4));
-	      }
-	    }
-	  }, {
-	    key: 'applyPickup',
-	    value: function applyPickup(pickup) {
-	      var _this2 = this;
-	
-	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
-	        this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
-	      }
-	
-	      // Kill the pickup after the time
-	      setTimeout(function () {
-	        return _this2.destroyPickup(pickup);
-	      }, pickup.attributes.duration);
-	    }
-	  }, {
-	    key: 'destroyPickup',
-	    value: function destroyPickup(pickup) {
-	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
-	        this.modifiers[pickup.attributes.modifier] -= pickup.attributes.value;
-	      }
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      this.updateInput();
-	      this.updateHorde();
-	    }
-	  }, {
-	    key: 'updateHorde',
-	    value: function updateHorde() {
-	      var _this3 = this;
-	
-	      var angle = 0;
-	      var radius = 100;
-	
-	      if (this.movementTimer >= this.timeBetweenMovements) {
-	        this.members.forEach(function (member) {
-	          var iRadius = radius + (0, _helpers.getRandomArbitrary)(-20, 20);
-	
-	          // Move player to new position
-	          member.setMovementInfo(iRadius, angle);
-	
-	          // Increment angle by random amount
-	          var baseAngleIncrease = 360 / _this3.members.length;
-	          angle += baseAngleIncrease + (0, _helpers.getRandomArbitrary)(5, 20);
-	        });
-	
-	        this.movementTimer = 0.0;
-	      }
-	
-	      this.movementTimer += this.game.time.elapsed;
-	    }
-	  }, {
-	    key: 'updateInput',
-	    value: function updateInput() {
-	      if (this.targetLocked !== false) {
-	        if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
-	          this.x += this.targetLocked.moveSpeed;
-	        }
-	
-	        this.targetLockedPreviousPos = { x: this.targetLocked.x, y: this.targetLocked.y };
-	        return;
-	      }
-	
-	      // Movement
-	      if (this.moveUp()) {
-	        this.y -= this.modifiers.moveSpeed;
-	      } else if (this.moveDown()) {
-	        this.y += this.modifiers.moveSpeed;
-	      }
-	
-	      if (this.moveLeft()) {
-	        this.x -= this.modifiers.moveSpeed;
-	      } else if (this.moveRight()) {
-	        this.x += this.modifiers.moveSpeed;
-	      }
-	    }
-	  }, {
-	    key: 'moveUp',
-	    value: function moveUp() {
-	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_UP) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) < -0.1 || this.wKey.isDown === true || this.cursors.up.isDown;
-	    }
-	  }, {
-	    key: 'moveRight',
-	    value: function moveRight() {
-	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_RIGHT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.1 || this.dKey.isDown === true || this.cursors.right.isDown;
-	    }
-	  }, {
-	    key: 'moveDown',
-	    value: function moveDown() {
-	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_DOWN) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) > 0.1 || this.sKey.isDown === true || this.cursors.down.isDown;
-	    }
-	  }, {
-	    key: 'moveLeft',
-	    value: function moveLeft() {
-	      return this.gamePad.isDown(Phaser.Gamepad.XBOX360_DPAD_LEFT) || this.gamePad.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.1 || this.aKey.isDown === true || this.cursors.left.isDown;
-	    }
-	  }]);
-	
-	  return HordeController;
-	}(Phaser.Sprite);
-	
-	exports.default = HordeController;
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _helpers = __webpack_require__(16);
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var HordeController = function (_Phaser$Sprite) {
-	  _inherits(HordeController, _Phaser$Sprite);
-	
-	  function HordeController(game, asset, hordeController, scale) {
-	    _classCallCheck(this, HordeController);
-	
-	    //  Enable Arcade Physics for the sprite
-	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, hordeController.x, hordeController.y, asset, 5));
-	
-	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-	
-	    // Phaser data
-	    _this.scale.setTo(scale, scale);
-	    _this.game = game;
-	    _this.anchor.setTo(0.5);
-	    _this.moveSpeed = 5;
-	
-	    _this.hordeController = hordeController;
-	
-	    // Setup animation
-	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-	    _this.play('right');
-	    return _this;
-	  }
-	
-	  _createClass(HordeController, [{
-	    key: 'update',
-	    value: function update() {
-	      this.x = this.hordeController.x + this.radius * Math.cos((0, _helpers.toRadians)(this.angle));
-	      this.y = this.hordeController.y + this.radius * Math.sin((0, _helpers.toRadians)(this.angle));
-	    }
-	  }, {
-	    key: 'setMovementInfo',
-	    value: function setMovementInfo(radius, angle) {
-	      this.radius = radius;
-	      this.angle = angle;
-	    }
-	  }]);
-	
-	  return HordeController;
-	}(Phaser.Sprite);
-	
-	exports.default = HordeController;
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.toRadians = toRadians;
-	exports.toDegrees = toDegrees;
-	exports.getRandomArbitrary = getRandomArbitrary;
-	exports.getRandomInt = getRandomInt;
-	exports.turnToAngle = turnToAngle;
-	exports.turnToFace = turnToFace;
-	function toRadians(angle) {
-	  return angle * (Math.PI / 180);
-	}
-	
-	function toDegrees(radians) {
-	  return radians * (180 / Math.PI);
-	}
-	
-	function getRandomArbitrary(min, max) {
-	  return Math.random() * (max - min) + min;
-	}
-	
-	/**
-	 * Returns a random integer between min (inclusive) and max (inclusive)
-	 * Using Math.round() will give you a non-uniform distribution!
-	 */
-	function getRandomInt(min, max) {
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-	
-	function turnToAngle(game, currentAngle, targetAngle, rotationSpeed) {
-	  var difference = targetAngle - currentAngle;
-	
-	  if (difference > game.math.PI) {
-	    difference = 2 * game.math - difference;
-	  } else if (difference < -game.math.PI) {
-	    difference = 2 * game.math + difference;
-	  }
-	
-	  // Move the character's rotation a set amount per unit time
-	  var delta = difference < 0 ? -rotationSpeed : rotationSpeed;
-	  return delta * game.time.elapsed;
-	}
-	
-	function turnToFace(game, obj1, obj2, rotationSpeed) {
-	  var targetAngle = game.math.angleBetween(obj1.x, obj1.y, obj2.x, obj2.y);
-	  obj1.rotation = targetAngle;
-	  // const rotateDiff = turnToAngle(game, obj1.body.rotation, targetAngle, rotationSpeed);
-	  // console.log(rotateDiff);
-	  //
-	  // obj1.rotation += rotateDiff;
-	}
-
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Pickup = function (_Phaser$Sprite) {
-	  _inherits(Pickup, _Phaser$Sprite);
-	
-	  /**
-	   * TTL is number of milliseconds the pickup lives for
-	   * Movespeed should be set only if this pickup affects movespeed
-	   */
-	  function Pickup(game, x, y, attr) {
-	    _classCallCheck(this, Pickup);
-	
-	    var _this = _possibleConstructorReturn(this, (Pickup.__proto__ || Object.getPrototypeOf(Pickup)).call(this, game, x, y, attr.asset, 5));
-	
-	    _this.attributes = attr;
-	
-	    //  Enable Arcade Physics for the sprite
-	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-	    return _this;
-	  }
-	
-	  return Pickup;
-	}(Phaser.Sprite);
-	
-	exports.default = Pickup;
-
-/***/ },
-/* 18 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Wave = function (_Phaser$Sprite) {
-	  _inherits(Wave, _Phaser$Sprite);
-	
-	  function Wave(game, x, y) {
-	    _classCallCheck(this, Wave);
-	
-	    //  Enable Arcade Physics for the sprite
-	    var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, game, x, y, 'sprite_wave', 5));
-	
-	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-	
-	    _this.moveSpeed = 0.8;
-	    _this.isMovingTowardLand = true;
-	    _this.moveTimer = 0.0;
-	    _this.totalMovingTime = 1800;
-	    return _this;
-	  }
-	
-	  _createClass(Wave, [{
-	    key: 'update',
-	    value: function update() {
-	      if (this.isMovingTowardLand) {
-	        this.x += this.moveSpeed;
-	      } else {
-	        this.x -= this.moveSpeed;
-	      }
-	
-	      if (this.moveTimer >= this.totalMovingTime) {
-	        this.isMovingTowardLand = !this.isMovingTowardLand;
-	        this.moveTimer = 0;
-	      }
-	      this.moveTimer += this.game.time.elapsed;
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {}
-	  }]);
-	
-	  return Wave;
-	}(Phaser.Sprite);
-	
-	exports.default = Wave;
-
-/***/ },
 /* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 	
@@ -18432,84 +18551,33 @@
 	  value: true
 	});
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _helpers = __webpack_require__(16);
-	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var Seagull = function (_Phaser$Sprite) {
-	  _inherits(Seagull, _Phaser$Sprite);
+	var EnemyCrab = function (_Phaser$Sprite) {
+	  _inherits(EnemyCrab, _Phaser$Sprite);
 	
-	  function Seagull(game, x, y, hordeControllers) {
-	    _classCallCheck(this, Seagull);
+	  function EnemyCrab(game, x, y) {
+	    _classCallCheck(this, EnemyCrab);
 	
 	    //  Enable Arcade Physics for the sprite
-	    var _this = _possibleConstructorReturn(this, (Seagull.__proto__ || Object.getPrototypeOf(Seagull)).call(this, game, x, y, 'sprite_seagull', 5));
+	    var _this = _possibleConstructorReturn(this, (EnemyCrab.__proto__ || Object.getPrototypeOf(EnemyCrab)).call(this, game, x, y, 'sprite_crab_enemy', 5));
 	
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	
-	    //  Tell it we don't want physics to manage the rotation
-	    _this.rotation = _this.game.physics.arcade.angleBetween(_this, {
-	      x: _this.game.width / 2,
-	      y: _this.game.height / 2
-	    });
-	
-	    // Do we have anything we want to move towards?
-	    _this.target = null;
-	    _this.hordeControllers = hordeControllers;
-	
-	    _this.lostTargetTimer = 0;
+	    // Setup animation
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+	    _this.play('move');
 	    return _this;
 	  }
 	
-	  _createClass(Seagull, [{
-	    key: 'changeTarget',
-	    value: function changeTarget(target) {
-	      this.target = target;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      if (this.lostTargetTimer > 0) {
-	        this.lostTargetTimer -= this.game.time.elapsed;
-	      }
-	
-	      if (this.target === null) {
-	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
-	
-	        // Without a target search for one
-	        if (this.lostTargetTimer <= 0 && typeof this.hordeControllers !== 'undefined' && this.hordeControllers.length > 0 && this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= 350) {
-	          this.lostTargetTimer = 0;
-	          this.changeTarget(this.hordeControllers.getChildAt(0));
-	        }
-	      } else if (this.target !== null) {
-	        this.rotation = this.game.physics.arcade.moveToObject(this, this.target, 240);
-	
-	        // Lose target if too close, stopped rapid spinning
-	        if (this.game.physics.arcade.distanceBetween(this, this.target) <= 20) {
-	          this.lostTargetTimer = 3000.0;
-	          this.changeTarget(null);
-	        }
-	      } else {
-	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
-	      }
-	    }
-	  }, {
-	    key: 'updateHordeControllers',
-	    value: function updateHordeControllers(hordeControllers) {
-	      this.hordeControllers = hordeControllers;
-	    }
-	  }]);
-	
-	  return Seagull;
+	  return EnemyCrab;
 	}(Phaser.Sprite);
 	
-	exports.default = Seagull;
+	exports.default = EnemyCrab;
 
 /***/ }
 /******/ ]);

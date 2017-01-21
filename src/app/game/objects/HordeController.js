@@ -11,7 +11,7 @@ export default class HordeController extends Phaser.Sprite {
     this.game = game;
     this.anchor.setTo(0.5);
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
-    this.body.setSize(10, 10, 46, 46);
+    this.body.setSize(30, 30, 46, 46);
 
     // Setup animation
     this.animations.add('left', [0, 1, 2, 3, 4], 10, true);

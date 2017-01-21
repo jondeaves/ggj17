@@ -11,20 +11,33 @@
   "gameplayScreen": [
     {
       "type": "image",
-      "key": "bg_gameplay_screen",
-      "url": "./assets/gameplayScreen/bg_gameplay_screen.png",
+      "key": "sprite_bg_layer_0",
+      "url": "./assets/gameplayScreen/sprite_bg_layer_0.png",
       "overwrite": false
     },
     {
       "type": "image",
-      "key": "bg_water_overlay",
-      "url": "./assets/gameplayScreen/bg_water_overlay.png",
+      "key": "sprite_bg_layer_1",
+      "url": "./assets/gameplayScreen/sprite_bg_layer_1.png",
       "overwrite": false
     },
     {
       "type": "image",
-      "key": "sprite_pickup_speed",
-      "url": "./assets/gameplayScreen/sprites/sprite_pickup_speed.png",
+      "key": "sprite_bg_layer_2",
+      "url": "./assets/gameplayScreen/sprite_bg_layer_2.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "sprite_bg_layer_3",
+      "url": "./assets/gameplayScreen/sprite_bg_layer_3.png",
+      "overwrite": false
+    },
+
+    {
+      "type": "image",
+      "key": "sprite_pickup_shelly",
+      "url": "./assets/gameplayScreen/sprites/sprite_pickup_shelly.png",
       "overwrite": false
     },
     {
@@ -62,7 +75,24 @@
       "frameWidth": 259,
       "frameHeight": 245,
       "frameMax": 10
+    },
+    {
+      "type": "spritesheet",
+      "key": "sprite_crab_enemy",
+      "url": "./assets/gameplayScreen/sprites/sprite_crab_enemy.png",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameMax": 8
+    },
+
+    {
+      "type": "audio",
+      "key": "state_walking_music",
+      "urls": ["/assets/audio/music/state_walking_music.wav"],
+      "autoDecode": true
     }
+
+
   ],
 
   "meta": {

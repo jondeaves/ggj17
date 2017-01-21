@@ -16,12 +16,26 @@
       "overwrite": false
     },
     {
+      "type": "image",
+      "key": "sprite_pickup_speed",
+      "url": "./assets/gameplayScreen/sprites/sprite_pickup_speed.png",
+      "overwrite": false
+    },
+    {
       "type": "spritesheet",
       "key": "sprite_player",
       "url": "./assets/gameplayScreen/sprites/sprite_player.png",
       "frameWidth": 102,
       "frameHeight": 102,
       "frameMax": 10
+    },
+    {
+      "type": "spritesheet",
+      "key": "sprite_crab",
+      "url": "./assets/gameplayScreen/sprites/sprite_crab.png",
+      "frameWidth": 95,
+      "frameHeight": 57,
+      "frameMax": 7
     }
   ],
 

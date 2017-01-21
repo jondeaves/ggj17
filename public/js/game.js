@@ -235,8 +235,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      this.state.start('SplashState', true, false);
-	      // this.state.start('GamePlayState', true, false);
+	      // this.state.start('SplashState', true, false);
+	      this.state.start('GamePlayState', true, false);
 	    }
 	  }]);
 	
@@ -261,9 +261,15 @@
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
+	var _helpers = __webpack_require__(16);
+	
 	var _HordeController = __webpack_require__(14);
 	
 	var _HordeController2 = _interopRequireDefault(_HordeController);
+	
+	var _Pickup = __webpack_require__(17);
+	
+	var _Pickup2 = _interopRequireDefault(_Pickup);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -291,16 +297,48 @@
 	
 	      // Generate the world as it begins
 	      this.generateWorld();
+	      this.generatePickups();
+	
+	      // Physics
+	      this.game.physics.startSystem(Phaser.Physics.ARCADE);
+	      this.game.physics.enable([this.hordeControllers, this.pickups], Phaser.Physics.ARCADE);
 	    }
 	  }, {
 	    key: 'generateWorld',
 	    value: function generateWorld() {
-	      this.hordeControllers = this.add.group();
-	      this.hordeController = new _HordeController2.default(this.game, 50, 50, 'sprite_player');
+	      // Setup the horde
+	      this.hordeControllers = this.add.physicsGroup();
+	      this.hordeController = new _HordeController2.default(this.game, 150, 150, 'sprite_player');
+	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
+	      // Setup the camera
 	      this.game.world.setBounds(null);
 	      this.game.camera.follow(this.hordeController);
+	    }
+	  }, {
+	    key: 'generatePickups',
+	    value: function generatePickups() {
+	      // Setup pickups
+	      this.pickups = this.game.add.physicsGroup();
+	      this.pickupTimeBetween = 3000.0;
+	      this.pickupTimer = 0.0;
+	
+	      this.pickupDefinitions = [{
+	        id: 0,
+	        ident: 'food',
+	        modifier: 'moveSpeed',
+	        value: 5,
+	        duration: 5000,
+	        asset: 'sprite_pickup_speed'
+	      }, {
+	        id: 1,
+	        ident: 'rubbish',
+	        modifier: 'moveSpeed',
+	        value: -2,
+	        duration: 3000,
+	        asset: 'sprite_pickup_speed'
+	      }];
 	    }
 	  }, {
 	    key: 'render',
@@ -313,11 +351,14 @@
 	    value: function update() {
 	      this.updateTimer();
 	
+	      // Update pickup spawns
+	      this.spawnPickups();
+	
 	      // Updates related to hordes
-	      this.hordeControllers.forEach(function (hordeController) {
-	        // Updates on the horde object
-	        hordeController.update();
-	      });
+	      this.hordeController.update();
+	
+	      // Physics
+	      this.game.physics.arcade.collide(this.hordeControllers, this.pickups, this.pickupCollision, null, this);
 	    }
 	  }, {
 	    key: 'updateTimer',
@@ -326,6 +367,33 @@
 	        this.totalTimeActive = 0;
 	      }
 	      this.totalTimeActive += this.time.elapsed;
+	    }
+	  }, {
+	    key: 'pickupCollision',
+	    value: function pickupCollision(hordeController, pickup) {
+	      console.log('Picked up ' + pickup.attributes.ident);
+	      hordeController.applyPickup(pickup);
+	      pickup.destroy();
+	    }
+	  }, {
+	    key: 'spawnPickups',
+	    value: function spawnPickups() {
+	      var _this2 = this;
+	
+	      if (this.pickupTimer >= this.pickupTimeBetween) {
+	        (function () {
+	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this2.pickupDefinitions.length - 1);
+	          var pickupIndex = _lodash2.default.findIndex(_this2.pickupDefinitions, function (o) {
+	            return o.id === pickupIdent;
+	          });
+	          var generatedPickup = _this2.pickupDefinitions[pickupIndex];
+	
+	          _this2.pickups.add(new _Pickup2.default(_this2.game, 500, 200, generatedPickup));
+	          _this2.pickupTimer = 0.0;
+	        })();
+	      }
+	
+	      this.pickupTimer += this.game.time.elapsed;
 	    }
 	  }]);
 	
@@ -17881,7 +17949,7 @@
 
 /***/ },
 /* 14 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -17890,6 +17958,14 @@
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(16);
+	
+	var _HordeMember = __webpack_require__(15);
+	
+	var _HordeMember2 = _interopRequireDefault(_HordeMember);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -17908,12 +17984,14 @@
 	
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
-	    _this.moveSpeed = 5;
 	
 	    // Setup animation
 	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
 	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
 	    _this.play('right');
+	
+	    // Setup members of horde
+	    _this.members = _this.game.add.group();
 	
 	    // Add input keys
 	    _this.cursors = _this.game.input.keyboard.createCursorKeys();
@@ -17925,36 +18003,94 @@
 	    // Gamepad
 	    _this.game.input.gamepad.start();
 	    _this.gamePad = _this.game.input.gamepad.pad1;
+	
+	    // Setup movement of hordes
+	    _this.movementTimer = 0.0;
+	    _this.timeBetweenMovements = 160.0;
+	
+	    // Modifiers, pickups
+	    _this.modifiers = {
+	      moveSpeed: 5
+	    };
 	    return _this;
 	  }
 	
 	  _createClass(HordeController, [{
+	    key: 'addToHorde',
+	    value: function addToHorde(count) {
+	      var iHorde = 0;
+	
+	      for (iHorde; iHorde < count; iHorde += 1) {
+	        this.members.add(new _HordeMember2.default(this.game, 'sprite_crab', this));
+	      }
+	    }
+	  }, {
+	    key: 'applyPickup',
+	    value: function applyPickup(pickup) {
+	      var _this2 = this;
+	
+	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+	        this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
+	      }
+	
+	      // Kill the pickup after the time
+	      setTimeout(function () {
+	        return _this2.destroyPickup(pickup);
+	      }, pickup.attributes.duration);
+	    }
+	  }, {
+	    key: 'destroyPickup',
+	    value: function destroyPickup(pickup) {
+	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+	        this.modifiers[pickup.attributes.modifier] -= pickup.attributes.value;
+	      }
+	    }
+	  }, {
 	    key: 'update',
 	    value: function update() {
 	      this.updateInput();
+	      this.updateHorde();
+	    }
+	  }, {
+	    key: 'updateHorde',
+	    value: function updateHorde() {
+	      var _this3 = this;
+	
+	      var angle = 0;
+	      var radius = 100;
+	
+	      if (this.movementTimer >= this.timeBetweenMovements) {
+	        this.members.forEach(function (member) {
+	          var iRadius = radius + (0, _helpers.getRandomArbitrary)(-20, 20);
+	
+	          // Move player to new position
+	          member.setMovementInfo(iRadius, angle);
+	
+	          // Increment angle by random amount
+	          var baseAngleIncrease = 360 / _this3.members.length;
+	          angle += baseAngleIncrease + (0, _helpers.getRandomArbitrary)(5, 20);
+	        });
+	
+	        this.movementTimer = 0.0;
+	      }
+	
+	      this.movementTimer += this.game.time.elapsed;
 	    }
 	  }, {
 	    key: 'updateInput',
 	    value: function updateInput() {
-	
-	      // Ensure input is captured only when within game window
-	      if (this.game.input.activePointer.withinGame) {
-	        this.game.input.enabled = true;
-	      } else {
-	        this.game.input.enabled = false;
-	      }
-	
 	      // Movement
+	      // console.log(this.modifiers);
 	      if (this.moveUp()) {
-	        this.y -= this.moveSpeed;
+	        this.y -= this.modifiers.moveSpeed;
 	      } else if (this.moveDown()) {
-	        this.y += this.moveSpeed;
+	        this.y += this.modifiers.moveSpeed;
 	      }
 	
 	      if (this.moveLeft()) {
-	        this.x -= this.moveSpeed;
+	        this.x -= this.modifiers.moveSpeed;
 	      } else if (this.moveRight()) {
-	        this.x += this.moveSpeed;
+	        this.x += this.modifiers.moveSpeed;
 	      }
 	    }
 	  }, {
@@ -17983,6 +18119,132 @@
 	}(Phaser.Sprite);
 	
 	exports.default = HordeController;
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _helpers = __webpack_require__(16);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var HordeController = function (_Phaser$Sprite) {
+	  _inherits(HordeController, _Phaser$Sprite);
+	
+	  function HordeController(game, asset, hordeController) {
+	    _classCallCheck(this, HordeController);
+	
+	    // Phaser data
+	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, hordeController.x, hordeController.y, asset, 5));
+	
+	    _this.game = game;
+	    _this.anchor.setTo(0.5);
+	    _this.moveSpeed = 5;
+	
+	    _this.hordeController = hordeController;
+	
+	    // Setup animation
+	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
+	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
+	    _this.play('right');
+	    return _this;
+	  }
+	
+	  _createClass(HordeController, [{
+	    key: 'update',
+	    value: function update() {
+	      this.x = this.hordeController.x + this.radius * Math.cos((0, _helpers.toRadians)(this.angle));
+	      this.y = this.hordeController.y + this.radius * Math.sin((0, _helpers.toRadians)(this.angle));
+	    }
+	  }, {
+	    key: 'setMovementInfo',
+	    value: function setMovementInfo(radius, angle) {
+	      this.radius = radius;
+	      this.angle = angle;
+	    }
+	  }]);
+	
+	  return HordeController;
+	}(Phaser.Sprite);
+	
+	exports.default = HordeController;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.toRadians = toRadians;
+	exports.getRandomArbitrary = getRandomArbitrary;
+	exports.getRandomInt = getRandomInt;
+	function toRadians(angle) {
+	  return angle * (Math.PI / 180);
+	}
+	
+	function getRandomArbitrary(min, max) {
+	  return Math.random() * (max - min) + min;
+	}
+	
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomInt(min, max) {
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Pickup = function (_Phaser$Sprite) {
+	  _inherits(Pickup, _Phaser$Sprite);
+	
+	  /**
+	   * TTL is number of milliseconds the pickup lives for
+	   * Movespeed should be set only if this pickup affects movespeed
+	   */
+	  function Pickup(game, x, y, attr) {
+	    _classCallCheck(this, Pickup);
+	
+	    var _this = _possibleConstructorReturn(this, (Pickup.__proto__ || Object.getPrototypeOf(Pickup)).call(this, game, x, y, attr.asset, 5));
+	
+	    _this.attributes = attr;
+	    return _this;
+	  }
+	
+	  return Pickup;
+	}(Phaser.Sprite);
+	
+	exports.default = Pickup;
 
 /***/ }
 /******/ ]);

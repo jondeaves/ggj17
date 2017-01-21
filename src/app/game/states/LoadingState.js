@@ -30,7 +30,7 @@ export default class LoadingState extends Phaser.State {
 
   loadComplete() {
     this.text.setText('Load Complete');
-    this.state.start('SplashState', true, false);
-    // this.state.start('GamePlayState', true, false);
+    // this.state.start('SplashState', true, false);
+    this.state.start('GamePlayState', true, false);
   }
 }

@@ -17766,9 +17766,7 @@
 	    _this.body.setSize(30, 30, 46, 46);
 	
 	    // Setup animation
-	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-	    _this.play('right');
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10, true);
 	
 	    // Setup members of horde
 	    _this.members = _this.game.add.physicsGroup();
@@ -17803,7 +17801,7 @@
 	      var iHorde = 0;
 	
 	      for (iHorde; iHorde < count; iHorde += 1) {
-	        this.members.add(new _HordeMember2.default(this.game, 'sprite_hermy', this, 0.4));
+	        this.members.add(new _HordeMember2.default(this.game, 'sprite_wiggle', this, 0.1));
 	      }
 	    }
 	  }, {
@@ -17843,14 +17841,16 @@
 	
 	      if (this.movementTimer >= this.timeBetweenMovements) {
 	        this.members.forEach(function (member) {
-	          var iRadius = radius + (0, _helpers.getRandomArbitrary)(-20, 20);
+	          // const iRadius = radius + getRandomArbitrary(-20, 20);
+	          var iRadius = radius;
 	
 	          // Move player to new position
 	          member.setMovementInfo(iRadius, angle);
 	
 	          // Increment angle by random amount
 	          var baseAngleIncrease = 360 / _this3.members.length;
-	          angle += baseAngleIncrease + (0, _helpers.getRandomArbitrary)(5, 20);
+	          // angle += baseAngleIncrease + getRandomArbitrary(5, 20);
+	          angle += baseAngleIncrease;
 	        });
 	
 	        this.movementTimer = 0.0;
@@ -17861,6 +17861,8 @@
 	  }, {
 	    key: 'updateInput',
 	    value: function updateInput() {
+	      var hasMoved = false;
+	
 	      if (this.targetLocked !== false) {
 	        if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
 	          this.x += this.targetLocked.moveSpeed;
@@ -17872,15 +17874,25 @@
 	
 	      // Movement
 	      if (this.moveUp()) {
+	        hasMoved = true;
 	        this.y -= this.modifiers.moveSpeed;
 	      } else if (this.moveDown()) {
+	        hasMoved = true;
 	        this.y += this.modifiers.moveSpeed;
 	      }
 	
 	      if (this.moveLeft()) {
+	        hasMoved = true;
 	        this.x -= this.modifiers.moveSpeed;
 	      } else if (this.moveRight()) {
+	        hasMoved = true;
 	        this.x += this.modifiers.moveSpeed;
+	      }
+	
+	      if (hasMoved) {
+	        this.animations.play('move');
+	      } else {
+	        this.animations.stop('move');
 	      }
 	    }
 	  }, {
@@ -17950,9 +17962,8 @@
 	    _this.hordeController = hordeController;
 	
 	    // Setup animation
-	    _this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-	    _this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-	    _this.play('right');
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5], 10, true);
+	    _this.animations.play('move');
 	    return _this;
 	  }
 	
@@ -18569,7 +18580,7 @@
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
 	
 	    // Setup animation
-	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
 	    _this.play('move');
 	    return _this;
 	  }

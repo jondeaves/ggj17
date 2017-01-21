@@ -7,7 +7,7 @@ export default class EnemyCrab extends Phaser.Sprite {
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
 
     // Setup animation
-    this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+    this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
     this.play('move');
   }
 }

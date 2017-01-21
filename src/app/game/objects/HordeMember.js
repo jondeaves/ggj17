@@ -17,9 +17,8 @@ export default class HordeController extends Phaser.Sprite {
     this.hordeController = hordeController;
 
     // Setup animation
-    this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-    this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-    this.play('right');
+    this.animations.add('move', [0, 1, 2, 3, 4, 5], 10, true);
+    this.animations.play('move');
   }
 
   update() {

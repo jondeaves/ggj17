@@ -14,9 +14,7 @@ export default class HordeController extends Phaser.Sprite {
     this.body.setSize(30, 30, 46, 46);
 
     // Setup animation
-    this.animations.add('left', [0, 1, 2, 3, 4], 10, true);
-    this.animations.add('right', [5, 6, 7, 8, 9], 10, true);
-    this.play('right');
+    this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10, true);
 
     // Setup members of horde
     this.members = this.game.add.physicsGroup();
@@ -50,9 +48,9 @@ export default class HordeController extends Phaser.Sprite {
     for (iHorde; iHorde < count; iHorde += 1) {
       this.members.add(new HordeMember(
         this.game,
-        'sprite_hermy',
+        'sprite_wiggle',
         this,
-        0.4,
+        0.1,
       ));
     }
   }
@@ -83,14 +81,16 @@ export default class HordeController extends Phaser.Sprite {
 
     if (this.movementTimer >= this.timeBetweenMovements) {
       this.members.forEach((member) => {
-        const iRadius = radius + getRandomArbitrary(-20, 20);
+        // const iRadius = radius + getRandomArbitrary(-20, 20);
+        const iRadius = radius;
 
         // Move player to new position
         member.setMovementInfo(iRadius, angle);
 
         // Increment angle by random amount
         const baseAngleIncrease = 360 / this.members.length;
-        angle += baseAngleIncrease + getRandomArbitrary(5, 20);
+        // angle += baseAngleIncrease + getRandomArbitrary(5, 20);
+        angle += baseAngleIncrease;
       });
 
       this.movementTimer = 0.0;
@@ -100,6 +100,8 @@ export default class HordeController extends Phaser.Sprite {
   }
 
   updateInput() {
+    let hasMoved = false;
+
     if (this.targetLocked !== false) {
       if (this.targetLocked.x !== this.targetLockedPreviousPos.x) {
         this.x += this.targetLocked.moveSpeed;
@@ -112,15 +114,25 @@ export default class HordeController extends Phaser.Sprite {
 
     // Movement
     if (this.moveUp()) {
+      hasMoved = true;
       this.y -= this.modifiers.moveSpeed;
     } else if (this.moveDown()) {
+      hasMoved = true;
       this.y += this.modifiers.moveSpeed;
     }
 
     if (this.moveLeft()) {
+      hasMoved = true;
       this.x -= this.modifiers.moveSpeed;
     } else if (this.moveRight()) {
+      hasMoved = true;
       this.x += this.modifiers.moveSpeed;
+    }
+
+    if (hasMoved) {
+      this.animations.play('move');
+    } else {
+      this.animations.stop('move');
     }
   }
 

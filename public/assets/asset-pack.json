@@ -78,6 +78,15 @@
     },
     {
       "type": "spritesheet",
+      "key": "sprite_wiggle",
+      "url": "./assets/gameplayScreen/sprites/sprite_wiggle.png",
+      "frameWidth": 699,
+      "frameHeight": 646,
+      "frameMax": 6
+    },
+
+    {
+      "type": "spritesheet",
       "key": "sprite_crab_enemy",
       "url": "./assets/gameplayScreen/sprites/sprite_crab_enemy.png",
       "frameWidth": 512,

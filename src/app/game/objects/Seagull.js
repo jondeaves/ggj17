@@ -43,7 +43,7 @@ export default class Seagull extends Phaser.Sprite {
       this.lostTargetTimer -= this.game.time.elapsed;
     }
 
-    if (this.target === null) {
+    if (this.target === null && this.x > 4600) {
       this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
 
       // Without a target search for one
@@ -66,6 +66,7 @@ export default class Seagull extends Phaser.Sprite {
       }
     } else {
       this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+      this.target = null;
     }
   }
 

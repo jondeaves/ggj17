@@ -257,21 +257,23 @@ export default class GamePlayState extends Phaser.State {
 
     //
     // Player colliding with large crab
+    let crabCollision = false;
     this.enemyCrabGroup.forEach((bigCrab) => {
       const bigCrabBound = bigCrab.getBounds();
       const hordeBounds = this.hordeController.getBounds();
 
       // Does this seagull overlap with the horde controller
       const hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
+      console.log(hordeCrabCollision);
       if (hordeCrabCollision && !bigCrab.isDead) {
         // Battle
+        crabCollision = true;
         this.triggerCombat();
         bigCrab.attackTarget = this.hordeController;
         this.hordeController.attackTarget = bigCrab;
       } else {
         // No battle
         bigCrab.attackTarget = null;
-        this.hordeController.attackTarget = null;
       }
     });
 

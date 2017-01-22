@@ -239,7 +239,7 @@ export default class HordeController extends Phaser.Sprite {
     if (this.attackTarget !== null && this.attackTarget.isDead) {
       this.killCount += 1;
       console.log('adding more shells');
-      this.addToHorde(2);
+      this.addToHorde(3);
       this.attackTarget = null;
     }
 

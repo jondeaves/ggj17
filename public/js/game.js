@@ -736,21 +736,23 @@
 	
 	      //
 	      // Player colliding with large crab
+	      var crabCollision = false;
 	      this.enemyCrabGroup.forEach(function (bigCrab) {
 	        var bigCrabBound = bigCrab.getBounds();
 	        var hordeBounds = _this3.hordeController.getBounds();
 	
 	        // Does this seagull overlap with the horde controller
 	        var hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
+	        console.log(hordeCrabCollision);
 	        if (hordeCrabCollision && !bigCrab.isDead) {
 	          // Battle
+	          crabCollision = true;
 	          _this3.triggerCombat();
 	          bigCrab.attackTarget = _this3.hordeController;
 	          _this3.hordeController.attackTarget = bigCrab;
 	        } else {
 	          // No battle
 	          bigCrab.attackTarget = null;
-	          _this3.hordeController.attackTarget = null;
 	        }
 	      });
 	
@@ -18358,7 +18360,7 @@
 	      if (this.attackTarget !== null && this.attackTarget.isDead) {
 	        this.killCount += 1;
 	        console.log('adding more shells');
-	        this.addToHorde(2);
+	        this.addToHorde(3);
 	        this.attackTarget = null;
 	      }
 	
@@ -18760,7 +18762,7 @@
 	        this.lostTargetTimer -= this.game.time.elapsed;
 	      }
 	
-	      if (this.target === null) {
+	      if (this.target === null && this.x > 4600) {
 	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
 	
 	        // Without a target search for one
@@ -18778,6 +18780,7 @@
 	        }
 	      } else {
 	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
+	        this.target = null;
 	      }
 	    }
 	  }, {

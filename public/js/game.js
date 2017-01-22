@@ -679,6 +679,8 @@
 	      // Check if horde controller is dead
 	      if (this.hordeController.isDead === true) {
 	        this.backgroundMusic.stop();
+	        this.transitionMusic.stop();
+	        this.combatMusic.stop();
 	        this.game.state.start('GameOverState', true, false);
 	      }
 	
@@ -791,6 +793,7 @@
 	    value: function triggerCombat() {
 	      var _this4 = this;
 	
+	      console.log(this.inCombat);
 	      if (this.inCombat) {
 	        return;
 	      } else {
@@ -800,20 +803,39 @@
 	        this.backgroundMusic.fadeOut(0.5);
 	
 	        // Fade in transition
-	        this.transitionMusic.fadeIn(0.5);
+	        this.transitionMusic.play();
+	        // this.transitionMusic.play();
+	        // this.transitionMusic.fadeIn(0.5);
 	
 	        // Start combat after one second
-	        console.log('combat music playing in 5 seconds');
 	        setTimeout(function () {
-	          console.log('combat music playing');
-	          _this4.combatMusic.loopFull(0);
-	        }, 5000);
+	          _this4.combatMusic.loopFull(0.6);
+	        }, 500);
 	      }
 	    }
 	  }, {
 	    key: 'cleanup',
 	    value: function cleanup() {
 	      var _this5 = this;
+	
+	      if (this.hordeController.attackTarget === null && this.combatMusic.isPlaying && this.combatMusic.volume === 0.6) {
+	        console.log('cleaning up');
+	        this.inCombat = false;
+	
+	        // Fade in transition
+	        this.transitionMusic.play();
+	        // this.transitionMusic.volume = 0;
+	        // this.transitionMusic.play();
+	        // this.transitionMusic.fadeIn(0.5);
+	
+	        // Start combat after one second
+	        this.combatMusic.stop();
+	
+	        setTimeout(function () {
+	          console.log('fading music back in');
+	          _this5.backgroundMusic.fadeIn(0.5);
+	        }, 500);
+	      }
 	
 	      this.seagullGroup.forEach(function (seagull) {
 	        if (seagull.x >= _this5.game.constants.world.bounds.width || seagull.y >= _this5.game.constants.world.bounds.height) {

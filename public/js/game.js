@@ -681,6 +681,9 @@
 	        this.backgroundMusic.stop();
 	        this.transitionMusic.stop();
 	        this.combatMusic.stop();
+	        this.seagullGroup.forEach(function (gull) {
+	          gull.stopSfx();
+	        });
 	        this.game.state.start('GameOverState', true, false);
 	      }
 	
@@ -725,13 +728,15 @@
 	            _this3.backgroundWaveMusic.fadeOut(0.5);
 	            _this3.transitionMusic.fadeOut(0.5);
 	            _this3.combatMusic.fadeOut(0.5);
+	            _this3.seagullGroup.forEach(function (gull) {
+	              gull.stopSfx();
+	            });
 	            setTimeout(function () {
 	              _this3.state.start('VictoryState', true, false);
 	            }, 500);
 	          } else {
 	            // Sent back and lose some crabs
 	            _this3.hordeController.queenFail();
-	            console.log('sending back and losing crabs');
 	          }
 	        }
 	      });
@@ -745,7 +750,6 @@
 	
 	        // Does this seagull overlap with the horde controller
 	        var hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
-	        console.log(hordeCrabCollision);
 	        if (hordeCrabCollision && !bigCrab.isDead) {
 	          // Battle
 	          crabCollision = true;
@@ -793,7 +797,6 @@
 	    value: function triggerCombat() {
 	      var _this4 = this;
 	
-	      console.log(this.inCombat);
 	      if (this.inCombat) {
 	        return;
 	      } else {
@@ -819,7 +822,6 @@
 	      var _this5 = this;
 	
 	      if (this.hordeController.attackTarget === null && this.combatMusic.isPlaying && this.combatMusic.volume === 0.6) {
-	        console.log('cleaning up');
 	        this.inCombat = false;
 	
 	        // Fade in transition
@@ -832,7 +834,6 @@
 	        this.combatMusic.stop();
 	
 	        setTimeout(function () {
-	          console.log('fading music back in');
 	          _this5.backgroundMusic.fadeIn(0.5);
 	        }, 500);
 	      }
@@ -902,7 +903,6 @@
 	      if (canSpawn || this.enemyCrabGroup.length === 0) {
 	        this.lastCrabSpawn = this.game.totalSecondsActive;
 	        //crabSpawnArea
-	        console.log('spawning crab');
 	
 	        var posX = this.game.rnd.integerInRange(this.crabSpawnArea[0] + 50, this.crabSpawnArea[2] - 50);
 	        var posY = this.game.rnd.integerInRange(this.crabSpawnArea[1] + 50, this.crabSpawnArea[3] - 50);
@@ -917,7 +917,6 @@
 	
 	      if (canSpawn || this.seagullGroup.length === 0) {
 	        this.lastSeagullSpawn = this.game.totalSecondsActive;
-	        console.log('spawning seagull');
 	
 	        var posX = this.game.rnd.integerInRange(this.seagullSpawnArea[0] + 50, this.seagullSpawnArea[2] - 50);
 	        var posY = this.game.rnd.integerInRange(this.seagullSpawnArea[1] + 50, this.seagullSpawnArea[3] - 50);
@@ -18195,6 +18194,7 @@
 	
 	    _this.resetAttack();
 	    _this.killCount = 0;
+	    _this.crabPickup = _this.game.add.audio('SFX_new_hermit_correct');
 	    return _this;
 	  }
 	
@@ -18235,6 +18235,7 @@
 	      var _this2 = this;
 	
 	      if (pickup.attributes.ident == 'shelly') {
+	        this.crabPickup.play();
 	        this.addToHorde(pickup.attributes.value);
 	      } else {
 	        if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
@@ -18381,7 +18382,6 @@
 	    value: function updateAttack() {
 	      if (this.attackTarget !== null && this.attackTarget.isDead) {
 	        this.killCount += 1;
-	        console.log('adding more shells');
 	        this.addToHorde(3);
 	        this.attackTarget = null;
 	      }
@@ -18568,7 +18568,6 @@
 	      var damage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.modifiers.health -= damage;
-	      console.log('Crab attacked: ' + this.modifiers.health);
 	    }
 	  }]);
 	
@@ -18744,6 +18743,9 @@
 	    var _this = _possibleConstructorReturn(this, (Seagull.__proto__ || Object.getPrototypeOf(Seagull)).call(this, game, x, y, 'sprite_seagull', 5));
 	
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    _this.animations.add('move', [0, 1, 2, 3], 4, true);
+	    _this.animations.play('move');
+	    _this.scale.setTo(0.4, 0.4);
 	
 	    //  Tell it we don't want physics to manage the rotation
 	    _this.rotation = _this.game.physics.arcade.angleBetween(_this, {
@@ -18758,6 +18760,8 @@
 	    _this.lostTargetTimer = 0;
 	
 	    _this.canAttack = true;
+	
+	    _this.targetLockedSfx = _this.game.add.audio('SFX_mine');
 	    return _this;
 	  }
 	
@@ -18772,12 +18776,31 @@
 	      this.target = target;
 	    }
 	  }, {
+	    key: 'stopSfx',
+	    value: function stopSfx() {
+	      this.targetLockedSfx.stop();
+	    }
+	  }, {
 	    key: 'update',
 	    value: function update() {
 	      if (this.game.totalTimeActive - this.lastCollision < 10) {
 	        this.canAttack = false;
 	      } else {
 	        this.canAttack = true;
+	      }
+	
+	      var distanceRequired = 1600;
+	
+	      if (this.target !== null) {
+	        var targetDistance = this.game.physics.arcade.distanceBetween(this, this.target);
+	        console.log(targetDistance, this.targetLockedSfx.isPlaying);
+	        if (targetDistance <= distanceRequired && this.targetLockedSfx.isPlaying === false) {
+	          this.targetLockedSfx.loopFull(1);
+	        } else {
+	          this.targetLockedSfx.stop();
+	        }
+	      } else {
+	        this.targetLockedSfx.stop();
 	      }
 	
 	      if (this.lostTargetTimer > 0) {
@@ -18788,7 +18811,7 @@
 	        this.game.physics.arcade.velocityFromAngle(this.angle, 180, this.body.velocity);
 	
 	        // Without a target search for one
-	        if (this.lostTargetTimer <= 0 && typeof this.hordeControllers !== 'undefined' && this.hordeControllers.length > 0 && this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= 350) {
+	        if (this.lostTargetTimer <= 0 && typeof this.hordeControllers !== 'undefined' && this.hordeControllers.length > 0 && this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= distanceRequired) {
 	          this.lostTargetTimer = 0;
 	          this.changeTarget(this.hordeControllers.getChildAt(0));
 	        }

@@ -53,6 +53,5 @@ export default class EnemyCrab extends Phaser.Sprite {
 
   attacked(damage = 1) {
     this.modifiers.health -= damage;
-    console.log(`Crab attacked: ${this.modifiers.health}`);
   }
 }

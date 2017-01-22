@@ -82,13 +82,6 @@
 
 
 
-
-    {
-      "type": "image",
-      "key": "sprite_seagull",
-      "url": "./assets/gameplayScreen/sprites/sprite_seagull.png",
-      "overwrite": false
-    },
     {
       "type": "image",
       "key": "sprite_umbrella",
@@ -96,6 +89,15 @@
       "overwrite": false
     },
 
+
+    {
+      "type": "spritesheet",
+      "key": "sprite_seagull",
+      "url": "./assets/gameplayScreen/sprites/sprite_seagull.png",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameMax": 4
+    },
     {
       "type": "spritesheet",
       "key": "sprite_wave",
@@ -165,6 +167,22 @@
       "urls": ["./assets/audio/Ambience/AMB_waves.wav"],
       "autoDecode": true
     },
+    {
+      "type": "audio",
+      "key": "SFX_new_hermit_correct",
+      "urls": ["./assets/audio/SFX/SFX_new_hermit_correct.wav"],
+      "autoDecode": true
+    },
+    {
+      "type": "audio",
+      "key": "SFX_mine",
+      "urls": ["./assets/audio/SFX/SFX_mine.wav"],
+      "autoDecode": true
+    },
+
+
+
+
 
 
 

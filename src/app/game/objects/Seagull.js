@@ -1,4 +1,4 @@
-import { turnToFace, toDegrees } from '../helpers';
+import { turnToFace, toDegrees, toRadians } from '../helpers';
 
 export default class Seagull extends Phaser.Sprite {
 
@@ -7,6 +7,9 @@ export default class Seagull extends Phaser.Sprite {
 
     //  Enable Arcade Physics for the sprite
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.animations.add('move', [0, 1, 2, 3], 4, true);
+    this.animations.play('move');
+    this.scale.setTo(0.4, 0.4);
 
     //  Tell it we don't want physics to manage the rotation
     this.rotation = this.game.physics.arcade.angleBetween(this, {
@@ -21,6 +24,8 @@ export default class Seagull extends Phaser.Sprite {
     this.lostTargetTimer = 0;
 
     this.canAttack = true;
+
+    this.targetLockedSfx = this.game.add.audio('SFX_mine');
   }
 
   setLastCollision(time) {
@@ -31,11 +36,29 @@ export default class Seagull extends Phaser.Sprite {
     this.target = target;
   }
 
+  stopSfx() {
+    this.targetLockedSfx.stop();
+  }
+
   update() {
     if ((this.game.totalTimeActive - this.lastCollision) < 10) {
       this.canAttack = false;
     } else {
       this.canAttack = true;
+    }
+
+    const distanceRequired = 1600;
+
+    if (this.target !== null) {
+      let targetDistance = this.game.physics.arcade.distanceBetween(this, this.target);
+      console.log(targetDistance, this.targetLockedSfx.isPlaying);
+      if (targetDistance <= distanceRequired && this.targetLockedSfx.isPlaying === false) {
+        this.targetLockedSfx.loopFull(1);
+      } else {
+        this.targetLockedSfx.stop();
+      }
+    } else {
+      this.targetLockedSfx.stop();
     }
 
 
@@ -51,13 +74,13 @@ export default class Seagull extends Phaser.Sprite {
         this.lostTargetTimer <= 0 &&
         typeof this.hordeControllers !== 'undefined' &&
         this.hordeControllers.length > 0 &&
-        this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= 350
+        this.game.physics.arcade.distanceBetween(this, this.hordeControllers.getChildAt(0)) <= distanceRequired
       ) {
         this.lostTargetTimer = 0;
         this.changeTarget(this.hordeControllers.getChildAt(0));
       }
     } else if (this.target !== null) {
-      this.rotation = this.game.physics.arcade.moveToObject(this, this.target, 240);
+      this.rotation = this.game.physics.arcade.moveToObject(this, this.target, 240) ;
 
       // Lose target if too close, stopped rapid spinning
       if (this.game.physics.arcade.distanceBetween(this, this.target) <= 20) {

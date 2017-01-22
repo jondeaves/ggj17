@@ -51,6 +51,7 @@ export default class HordeController extends Phaser.Sprite {
 
     this.resetAttack();
     this.killCount = 0;
+    this.crabPickup = this.game.add.audio('SFX_new_hermit_correct');
   }
 
   getHealth() {
@@ -88,6 +89,7 @@ export default class HordeController extends Phaser.Sprite {
 
   applyPickup(pickup) {
     if (pickup.attributes.ident == 'shelly') {
+      this.crabPickup.play();
       this.addToHorde(pickup.attributes.value);
     } else {
       if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
@@ -238,7 +240,6 @@ export default class HordeController extends Phaser.Sprite {
   updateAttack() {
     if (this.attackTarget !== null && this.attackTarget.isDead) {
       this.killCount += 1;
-      console.log('adding more shells');
       this.addToHorde(3);
       this.attackTarget = null;
     }

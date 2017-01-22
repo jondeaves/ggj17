@@ -53,7 +53,6 @@ export default class GamePlayState extends Phaser.State {
     this.transitionMusic = this.game.add.audio('trans_wave');
     this.combatMusic = this.game.add.audio('state_combat_music');
 
-
     // Text
     const style = {
       font: 'bold 32px Arial',
@@ -200,6 +199,9 @@ export default class GamePlayState extends Phaser.State {
       this.backgroundMusic.stop();
       this.transitionMusic.stop();
       this.combatMusic.stop();
+      this.seagullGroup.forEach((gull) => {
+        gull.stopSfx();
+      });
       this.game.state.start('GameOverState', true, false);
     }
 
@@ -246,13 +248,15 @@ export default class GamePlayState extends Phaser.State {
           this.backgroundWaveMusic.fadeOut(0.5);
           this.transitionMusic.fadeOut(0.5);
           this.combatMusic.fadeOut(0.5);
+          this.seagullGroup.forEach((gull) => {
+            gull.stopSfx();
+          });
           setTimeout(() => {
             this.state.start('VictoryState', true, false);
           }, 500);
         } else {
           // Sent back and lose some crabs
           this.hordeController.queenFail();
-          console.log('sending back and losing crabs');
         }
       }
     });
@@ -266,7 +270,6 @@ export default class GamePlayState extends Phaser.State {
 
       // Does this seagull overlap with the horde controller
       const hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
-      console.log(hordeCrabCollision);
       if (hordeCrabCollision && !bigCrab.isDead) {
         // Battle
         crabCollision = true;
@@ -313,7 +316,6 @@ export default class GamePlayState extends Phaser.State {
   }
 
   triggerCombat() {
-    console.log(this.inCombat);
     if (this.inCombat) {
       return;
     } else {
@@ -340,7 +342,6 @@ export default class GamePlayState extends Phaser.State {
       this.combatMusic.isPlaying &&
       this.combatMusic.volume === 0.6
     ) {
-      console.log('cleaning up');
       this.inCombat = false;
 
       // Fade in transition
@@ -353,7 +354,6 @@ export default class GamePlayState extends Phaser.State {
       this.combatMusic.stop();
 
       setTimeout(() => {
-        console.log('fading music back in');
         this.backgroundMusic.fadeIn(0.5);
       }, 500);
     }
@@ -421,7 +421,6 @@ export default class GamePlayState extends Phaser.State {
     if (canSpawn || this.enemyCrabGroup.length === 0) {
       this.lastCrabSpawn = this.game.totalSecondsActive;
       //crabSpawnArea
-      console.log('spawning crab');
 
       const posX = this.game.rnd.integerInRange(this.crabSpawnArea[0] + 50, this.crabSpawnArea[2] - 50);
       const posY = this.game.rnd.integerInRange(this.crabSpawnArea[1] + 50, this.crabSpawnArea[3] - 50);
@@ -438,7 +437,6 @@ export default class GamePlayState extends Phaser.State {
 
     if (canSpawn || this.seagullGroup.length === 0) {
       this.lastSeagullSpawn = this.game.totalSecondsActive;
-      console.log('spawning seagull');
 
       const posX = this.game.rnd.integerInRange(this.seagullSpawnArea[0] + 50, this.seagullSpawnArea[2] - 50);
       const posY = this.game.rnd.integerInRange(this.seagullSpawnArea[1] + 50, this.seagullSpawnArea[3] - 50);

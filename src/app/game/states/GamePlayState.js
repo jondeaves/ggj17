@@ -42,7 +42,20 @@ export default class GamePlayState extends Phaser.State {
     }, this);
 
 
+    // Text
+    const style = {
+      font: 'bold 32px Arial',
+      fill: '#333333',
+    };
+
+    // Health and kills
+    this.healthText = this.game.add.text(0, 0, 'Health: 0', style);
+    this.killText = this.game.add.text(0, 30, 'Kills: 0', style);
+
+
     // Sprite ordering
+    this.game.world.sendToBack(this.healthText);
+    this.game.world.sendToBack(this.killText);
     this.game.world.sendToBack(this.seagullGroup);
     this.game.world.sendToBack(this.umbrellaGroup);
     this.game.world.sendToBack(this.waveGroup);
@@ -148,6 +161,26 @@ export default class GamePlayState extends Phaser.State {
     this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
 
 
+    //
+    // Player colliding with large crab
+    this.enemyCrabGroup.forEach((bigCrab) => {
+      const bigCrabBound = bigCrab.getBounds();
+      const hordeBounds = this.hordeController.getBounds();
+
+      // Does this seagull overlap with the horde controller
+      const hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
+      if (hordeCrabCollision && !bigCrab.isDead) {
+        // Battle
+        bigCrab.attackTarget = this.hordeController;
+        this.hordeController.attackTarget = bigCrab;
+      } else {
+        // No battle
+        bigCrab.attackTarget = null;
+        this.hordeController.attackTarget = null;
+      }
+    });
+
+
     // Check if seagull is colliding with horde but not umbrella
     this.seagullGroup.forEach((seagull) => {
       const seagullBound = seagull.getBounds();
@@ -173,12 +206,24 @@ export default class GamePlayState extends Phaser.State {
         }
       }
     });
+
+
+    // Update GUI text
+    this.healthText.text = `Health: ${this.hordeController.getHealth()}`;
+    this.killText.text = `Kills: ${this.hordeController.killCount}`;
   }
 
   cleanup() {
     this.seagullGroup.forEach((seagull) => {
       if (seagull.x >= this.game.constants.world.bounds.width || seagull.y >= this.game.constants.world.bounds.height) {
         seagull.destroy();
+      }
+    });
+
+
+    this.enemyCrabGroup.forEach((bigCrab) => {
+      if (bigCrab.isDead) {
+        bigCrab.destroy();
       }
     });
   }

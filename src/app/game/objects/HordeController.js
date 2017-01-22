@@ -43,6 +43,13 @@ export default class HordeController extends Phaser.Sprite {
     };
     this.targetLocked = false;
     this.targetLockedPreviousPos = { x: 0, y: 0 };
+
+    this.resetAttack();
+    this.killCount = 0;
+  }
+
+  getHealth() {
+    return this.modifiers.health + this.members.length;
   }
 
   addToHorde(count) {
@@ -90,6 +97,7 @@ export default class HordeController extends Phaser.Sprite {
   update() {
     this.updateInput();
     this.updateHorde();
+    this.updateAttack();
 
     if (!this.isDead) {
       this.checkDeath();
@@ -202,12 +210,37 @@ export default class HordeController extends Phaser.Sprite {
     );
   }
 
-  attacked() {
+  attacked(damage = 1) {
     const removeState = this.removeFromHorde(1);
     if (removeState === false) {
       // if false, assume we have no members left
       // and have been directly attacked.
-      this.modifiers.health -= 1;
+      this.modifiers.health -= damage;
     }
+  }
+
+  updateAttack() {
+    if (this.attackTarget !== null && this.attackTarget.isDead) {
+      this.killCount += 1;
+      this.attackTarget = null;
+    }
+
+    if (this.attackTarget !== null) {
+      if (this.attackTimer >= this.attackRate) {
+        this.attackTarget.attacked(this.attackStrength + (this.members.length));
+        this.attackTimer = 0;
+      }
+
+      this.attackTimer += this.game.time.elapsed;
+    } else {
+      this.resetAttack();
+    }
+  }
+
+  resetAttack() {
+    this.attackTimer = 0;
+    this.attackRate = 3000;
+    this.attackStrength = 1;
+    this.attackTarget = null;
   }
 }

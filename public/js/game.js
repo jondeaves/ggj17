@@ -498,7 +498,19 @@
 	        }, 3000);
 	      }, this);
 	
+	      // Text
+	      var style = {
+	        font: 'bold 32px Arial',
+	        fill: '#333333'
+	      };
+	
+	      // Health and kills
+	      this.healthText = this.game.add.text(0, 0, 'Health: 0', style);
+	      this.killText = this.game.add.text(0, 30, 'Kills: 0', style);
+	
 	      // Sprite ordering
+	      this.game.world.sendToBack(this.healthText);
+	      this.game.world.sendToBack(this.killText);
 	      this.game.world.sendToBack(this.seagullGroup);
 	      this.game.world.sendToBack(this.umbrellaGroup);
 	      this.game.world.sendToBack(this.waveGroup);
@@ -605,6 +617,25 @@
 	      // Player colliding with wave
 	      this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
 	
+	      //
+	      // Player colliding with large crab
+	      this.enemyCrabGroup.forEach(function (bigCrab) {
+	        var bigCrabBound = bigCrab.getBounds();
+	        var hordeBounds = _this3.hordeController.getBounds();
+	
+	        // Does this seagull overlap with the horde controller
+	        var hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
+	        if (hordeCrabCollision && !bigCrab.isDead) {
+	          // Battle
+	          bigCrab.attackTarget = _this3.hordeController;
+	          _this3.hordeController.attackTarget = bigCrab;
+	        } else {
+	          // No battle
+	          bigCrab.attackTarget = null;
+	          _this3.hordeController.attackTarget = null;
+	        }
+	      });
+	
 	      // Check if seagull is colliding with horde but not umbrella
 	      this.seagullGroup.forEach(function (seagull) {
 	        var seagullBound = seagull.getBounds();
@@ -630,6 +661,10 @@
 	          }
 	        }
 	      });
+	
+	      // Update GUI text
+	      this.healthText.text = 'Health: ' + this.hordeController.getHealth();
+	      this.killText.text = 'Kills: ' + this.hordeController.killCount;
 	    }
 	  }, {
 	    key: 'cleanup',
@@ -639,6 +674,12 @@
 	      this.seagullGroup.forEach(function (seagull) {
 	        if (seagull.x >= _this4.game.constants.world.bounds.width || seagull.y >= _this4.game.constants.world.bounds.height) {
 	          seagull.destroy();
+	        }
+	      });
+	
+	      this.enemyCrabGroup.forEach(function (bigCrab) {
+	        if (bigCrab.isDead) {
+	          bigCrab.destroy();
 	        }
 	      });
 	    }
@@ -17949,10 +17990,18 @@
 	    };
 	    _this.targetLocked = false;
 	    _this.targetLockedPreviousPos = { x: 0, y: 0 };
+	
+	    _this.resetAttack();
+	    _this.killCount = 0;
 	    return _this;
 	  }
 	
 	  _createClass(HordeController, [{
+	    key: 'getHealth',
+	    value: function getHealth() {
+	      return this.modifiers.health + this.members.length;
+	    }
+	  }, {
 	    key: 'addToHorde',
 	    value: function addToHorde(count) {
 	      var iHorde = 0;
@@ -18002,6 +18051,7 @@
 	    value: function update() {
 	      this.updateInput();
 	      this.updateHorde();
+	      this.updateAttack();
 	
 	      if (!this.isDead) {
 	        this.checkDeath();
@@ -18104,12 +18154,41 @@
 	  }, {
 	    key: 'attacked',
 	    value: function attacked() {
+	      var damage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	
 	      var removeState = this.removeFromHorde(1);
 	      if (removeState === false) {
 	        // if false, assume we have no members left
 	        // and have been directly attacked.
-	        this.modifiers.health -= 1;
+	        this.modifiers.health -= damage;
 	      }
+	    }
+	  }, {
+	    key: 'updateAttack',
+	    value: function updateAttack() {
+	      if (this.attackTarget !== null && this.attackTarget.isDead) {
+	        this.killCount += 1;
+	        this.attackTarget = null;
+	      }
+	
+	      if (this.attackTarget !== null) {
+	        if (this.attackTimer >= this.attackRate) {
+	          this.attackTarget.attacked(this.attackStrength + this.members.length);
+	          this.attackTimer = 0;
+	        }
+	
+	        this.attackTimer += this.game.time.elapsed;
+	      } else {
+	        this.resetAttack();
+	      }
+	    }
+	  }, {
+	    key: 'resetAttack',
+	    value: function resetAttack() {
+	      this.attackTimer = 0;
+	      this.attackRate = 3000;
+	      this.attackStrength = 1;
+	      this.attackTarget = null;
 	    }
 	  }]);
 	
@@ -18192,6 +18271,8 @@
 	  value: true
 	});
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -18212,8 +18293,59 @@
 	    // Setup animation
 	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
 	    _this.play('move');
+	
+	    // Attack state
+	    _this.isDead = false;
+	    _this.modifiers = {
+	      health: 3
+	    };
+	    _this.resetAttack();
 	    return _this;
 	  }
+	
+	  _createClass(EnemyCrab, [{
+	    key: 'update',
+	    value: function update() {
+	      this.checkDeath();
+	
+	      if (this.attackTarget !== null) {
+	        if (this.attackTimer >= this.attackRate) {
+	          this.attackTarget.attacked(this.attackStrength);
+	          this.attackTimer = 0;
+	        }
+	
+	        this.attackTimer += this.game.time.elapsed;
+	      } else {
+	        this.resetAttack();
+	      }
+	    }
+	  }, {
+	    key: 'checkDeath',
+	    value: function checkDeath() {
+	      if (this.modifiers.health > 0) {
+	        return false;
+	      }
+	
+	      this.isDead = true;
+	      return true;
+	    }
+	  }, {
+	    key: 'resetAttack',
+	    value: function resetAttack() {
+	      this.attackTimer = 0;
+	      this.attackRate = 3000;
+	      this.attackStrength = 2;
+	      this.attackTarget = null;
+	    }
+	  }, {
+	    key: 'attacked',
+	    value: function attacked() {
+	      var damage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	
+	      this.modifiers.health -= damage;
+	      console.log('Crab attacked: ' + this.modifiers.health);
+	    }
+	  }]);
 	
 	  return EnemyCrab;
 	}(Phaser.Sprite);

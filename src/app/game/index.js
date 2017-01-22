@@ -1,6 +1,7 @@
 import BootState from './states/BootState';
 import LoadingState from './states/LoadingState';
 import SplashState from './states/SplashState';
+import InstructionState from './states/InstructionState';
 import MenuState from './states/MenuState';
 import GamePlayState from './states/GamePlayState';
 import GameOverState from './states/GameOverState';
@@ -17,6 +18,7 @@ export default class Game extends Phaser.Game {
     this.state.add('LoadingState', LoadingState);
     this.state.add('SplashState', SplashState);
     this.state.add('MenuState', MenuState);
+    this.state.add('InstructionState', InstructionState);
     this.state.add('GamePlayState', GamePlayState);
     this.state.add('GameOverState', GameOverState);
     this.state.add('VictoryState', VictoryState);

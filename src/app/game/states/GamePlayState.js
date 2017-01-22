@@ -70,6 +70,11 @@ export default class GamePlayState extends Phaser.State {
     this.game.world.sendToBack(this.pickups);
     this.game.world.sendToBack(this.bgLayer1);        // Algae
     this.game.world.sendToBack(this.bgLayer0);        // Sand and road
+
+
+    // Game states for audio
+    this.states = {
+    };
   }
 
   generateWorld() {

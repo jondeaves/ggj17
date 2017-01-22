@@ -79,6 +79,10 @@
 	
 	var _SplashState2 = _interopRequireDefault(_SplashState);
 	
+	var _InstructionState = __webpack_require__(24);
+	
+	var _InstructionState2 = _interopRequireDefault(_InstructionState);
+	
 	var _MenuState = __webpack_require__(5);
 	
 	var _MenuState2 = _interopRequireDefault(_MenuState);
@@ -119,6 +123,7 @@
 	    _this.state.add('LoadingState', _LoadingState2.default);
 	    _this.state.add('SplashState', _SplashState2.default);
 	    _this.state.add('MenuState', _MenuState2.default);
+	    _this.state.add('InstructionState', _InstructionState2.default);
 	    _this.state.add('GamePlayState', _GamePlayState2.default);
 	    _this.state.add('GameOverState', _GameOverState2.default);
 	    _this.state.add('VictoryState', _VictoryState2.default);
@@ -228,6 +233,7 @@
 	      // Begin the load
 	      this.game.load.pack('splashScreen', './assets/asset-pack.json', null, this);
 	      this.game.load.pack('menuScreen', './assets/asset-pack.json', null, this);
+	      this.game.load.pack('instructionScreen', './assets/asset-pack.json', null, this);
 	      this.game.load.pack('gameplayScreen', './assets/asset-pack.json', null, this);
 	      this.game.load.pack('gameoverScreen', './assets/asset-pack.json', null, this);
 	      this.game.load.pack('victoryScreen', './assets/asset-pack.json', null, this);
@@ -248,8 +254,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      // this.state.start('SplashState', true, false);
-	      this.state.start('GamePlayState', true, false);
+	      this.state.start('SplashState', true, false);
+	      // this.state.start('GamePlayState', true, false);
 	      // this.state.start('VictoryState', true, false);
 	      // this.state.start('GameOverState', true, false);
 	    }
@@ -311,7 +317,7 @@
 	    key: 'splashComplete',
 	    value: function splashComplete() {
 	      this.totalTimeActive = 0;
-	      this.state.start('MenuState', true, false);
+	      this.state.start('InstructionState', true, false);
 	    }
 	  }]);
 	
@@ -525,6 +531,10 @@
 	      this.game.world.sendToBack(this.pickups);
 	      this.game.world.sendToBack(this.bgLayer1); // Algae
 	      this.game.world.sendToBack(this.bgLayer0); // Sand and road
+	
+	
+	      // Game states for audio
+	      this.states = {};
 	    }
 	  }, {
 	    key: 'generateWorld',
@@ -19115,6 +19125,66 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var InstructionState = function (_Phaser$State) {
+	  _inherits(InstructionState, _Phaser$State);
+	
+	  function InstructionState() {
+	    _classCallCheck(this, InstructionState);
+	
+	    return _possibleConstructorReturn(this, (InstructionState.__proto__ || Object.getPrototypeOf(InstructionState)).apply(this, arguments));
+	  }
+	
+	  _createClass(InstructionState, [{
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_instruction_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	
+	      this.totalTimeActive = 0;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.totalTimeActive += this.time.elapsed;
+	
+	      if (this.totalTimeActive > 5000) {
+	        this.splashComplete();
+	      }
+	    }
+	  }, {
+	    key: 'splashComplete',
+	    value: function splashComplete() {
+	      this.totalTimeActive = 0;
+	      this.state.start('MenuState', true, false);
+	    }
+	  }]);
+	
+	  return InstructionState;
+	}(Phaser.State);
+	
+	exports.default = InstructionState;
 
 /***/ }
 /******/ ]);

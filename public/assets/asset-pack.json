@@ -7,6 +7,17 @@
       "overwrite": false
     }
   ],
+  "instructionScreen": [
+    {
+      "type": "image",
+      "key": "bg_instruction_screen",
+      "url": "./assets/instructionScreen/bg_instruction_screen.png",
+      "overwrite": false
+    }
+  ],
+
+
+
 
   "menuScreen": [
     {

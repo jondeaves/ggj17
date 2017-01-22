@@ -52,7 +52,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	__webpack_require__(20);
+	__webpack_require__(22);
 	
 	// eslint-disable-next-line no-unused-vars
 	var game = new _game2.default();
@@ -81,27 +81,27 @@
 	
 	var _SplashState2 = _interopRequireDefault(_SplashState);
 	
-	var _InstructionState = __webpack_require__(24);
+	var _InstructionState = __webpack_require__(5);
 	
 	var _InstructionState2 = _interopRequireDefault(_InstructionState);
 	
-	var _MenuState = __webpack_require__(5);
+	var _MenuState = __webpack_require__(6);
 	
 	var _MenuState2 = _interopRequireDefault(_MenuState);
 	
-	var _GamePlayState = __webpack_require__(6);
+	var _GamePlayState = __webpack_require__(7);
 	
 	var _GamePlayState2 = _interopRequireDefault(_GamePlayState);
 	
-	var _GameOverState = __webpack_require__(17);
+	var _GameOverState = __webpack_require__(19);
 	
 	var _GameOverState2 = _interopRequireDefault(_GameOverState);
 	
-	var _VictoryState = __webpack_require__(18);
+	var _VictoryState = __webpack_require__(20);
 	
 	var _VictoryState2 = _interopRequireDefault(_VictoryState);
 	
-	var _constants = __webpack_require__(19);
+	var _constants = __webpack_require__(21);
 	
 	var _constants2 = _interopRequireDefault(_constants);
 	
@@ -270,8 +270,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      // this.state.start('SplashState', true, false);
-	      this.state.start('GamePlayState', true, false);
+	      this.state.start('SplashState', true, false);
+	      // this.state.start('GamePlayState', true, false);
 	      // this.state.start('VictoryState', true, false);
 	      // this.state.start('GameOverState', true, false);
 	    }
@@ -360,6 +360,66 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	var InstructionState = function (_Phaser$State) {
+	  _inherits(InstructionState, _Phaser$State);
+	
+	  function InstructionState() {
+	    _classCallCheck(this, InstructionState);
+	
+	    return _possibleConstructorReturn(this, (InstructionState.__proto__ || Object.getPrototypeOf(InstructionState)).apply(this, arguments));
+	  }
+	
+	  _createClass(InstructionState, [{
+	    key: 'create',
+	    value: function create() {
+	      // Just to get us started
+	      this.stage.backgroundColor = '#182d3b';
+	      this.stateBg = this.add.image(0, 0, 'bg_instruction_screen');
+	      this.stateBg.width = this.game.width;
+	      this.stateBg.height = this.game.height;
+	
+	      this.totalTimeActive = 0;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      this.totalTimeActive += this.time.elapsed;
+	
+	      if (this.totalTimeActive > 5000) {
+	        this.splashComplete();
+	      }
+	    }
+	  }, {
+	    key: 'splashComplete',
+	    value: function splashComplete() {
+	      this.totalTimeActive = 0;
+	      this.state.start('MenuState', true, false);
+	    }
+	  }]);
+	
+	  return InstructionState;
+	}(Phaser.State);
+	
+	exports.default = InstructionState;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
 	var MenuState = function (_Phaser$State) {
 	  _inherits(MenuState, _Phaser$State);
 	
@@ -430,7 +490,7 @@
 	exports.default = MenuState;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -441,37 +501,37 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _lodash = __webpack_require__(7);
+	var _lodash = __webpack_require__(8);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _helpers = __webpack_require__(9);
+	var _helpers = __webpack_require__(10);
 	
-	var _HordeController = __webpack_require__(10);
+	var _HordeController = __webpack_require__(11);
 	
 	var _HordeController2 = _interopRequireDefault(_HordeController);
 	
-	var _QueenCrab = __webpack_require__(25);
+	var _QueenCrab = __webpack_require__(13);
 	
 	var _QueenCrab2 = _interopRequireDefault(_QueenCrab);
 	
-	var _EnemyCrab = __webpack_require__(12);
+	var _EnemyCrab = __webpack_require__(14);
 	
 	var _EnemyCrab2 = _interopRequireDefault(_EnemyCrab);
 	
-	var _Wave = __webpack_require__(13);
+	var _Wave = __webpack_require__(15);
 	
 	var _Wave2 = _interopRequireDefault(_Wave);
 	
-	var _Pickup = __webpack_require__(14);
+	var _Pickup = __webpack_require__(16);
 	
 	var _Pickup2 = _interopRequireDefault(_Pickup);
 	
-	var _Seagull = __webpack_require__(15);
+	var _Seagull = __webpack_require__(17);
 	
 	var _Seagull2 = _interopRequireDefault(_Seagull);
 	
-	var _Umbrella = __webpack_require__(16);
+	var _Umbrella = __webpack_require__(18);
 	
 	var _Umbrella2 = _interopRequireDefault(_Umbrella);
 	
@@ -951,7 +1011,7 @@
 	exports.default = GamePlayState;
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -18039,10 +18099,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(8)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(9)(module)))
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -18058,7 +18118,7 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -18116,7 +18176,7 @@
 	}
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18127,9 +18187,9 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _helpers = __webpack_require__(9);
+	var _helpers = __webpack_require__(10);
 	
-	var _HordeMember = __webpack_require__(11);
+	var _HordeMember = __webpack_require__(12);
 	
 	var _HordeMember2 = _interopRequireDefault(_HordeMember);
 	
@@ -18422,7 +18482,7 @@
 	exports.default = HordeController;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18433,7 +18493,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _helpers = __webpack_require__(9);
+	var _helpers = __webpack_require__(10);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -18486,7 +18546,47 @@
 	exports.default = HordeController;
 
 /***/ },
-/* 12 */
+/* 13 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var QueenCrab = function (_Phaser$Sprite) {
+	  _inherits(QueenCrab, _Phaser$Sprite);
+	
+	  function QueenCrab(game, x, y) {
+	    _classCallCheck(this, QueenCrab);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (QueenCrab.__proto__ || Object.getPrototypeOf(QueenCrab)).call(this, game, x, y, 'sprite_queen', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    // Setup animation
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
+	    _this.play('move');
+	
+	    _this.health = 8;
+	    return _this;
+	  }
+	
+	  return QueenCrab;
+	}(Phaser.Sprite);
+	
+	exports.default = QueenCrab;
+
+/***/ },
+/* 14 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18577,7 +18677,7 @@
 	exports.default = EnemyCrab;
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18671,7 +18771,7 @@
 	exports.default = Wave;
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -18714,7 +18814,7 @@
 	exports.default = Pickup;
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18725,7 +18825,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _helpers = __webpack_require__(9);
+	var _helpers = __webpack_require__(10);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -18793,9 +18893,10 @@
 	
 	      if (this.target !== null) {
 	        var targetDistance = this.game.physics.arcade.distanceBetween(this, this.target);
-	        console.log(targetDistance, this.targetLockedSfx.isPlaying);
-	        if (targetDistance <= distanceRequired && this.targetLockedSfx.isPlaying === false) {
-	          this.targetLockedSfx.loopFull(1);
+	        if (targetDistance <= distanceRequired) {
+	          if (this.targetLockedSfx.isPlaying === false) {
+	            this.targetLockedSfx.loopFull(1);
+	          }
 	        } else {
 	          this.targetLockedSfx.stop();
 	        }
@@ -18841,7 +18942,7 @@
 	exports.default = Seagull;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18892,7 +18993,7 @@
 	exports.default = Umbrella;
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18946,7 +19047,7 @@
 	exports.default = GameOverState;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19000,7 +19101,7 @@
 	exports.default = MenuState;
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -19025,16 +19126,16 @@
 	};
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(21);
+	var content = __webpack_require__(23);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(23)(content, {});
+	var update = __webpack_require__(25)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -19051,10 +19152,10 @@
 	}
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(22)();
+	exports = module.exports = __webpack_require__(24)();
 	// imports
 	
 	
@@ -19065,7 +19166,7 @@
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports) {
 
 	/*
@@ -19121,7 +19222,7 @@
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -19371,106 +19472,6 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
-
-/***/ },
-/* 24 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var InstructionState = function (_Phaser$State) {
-	  _inherits(InstructionState, _Phaser$State);
-	
-	  function InstructionState() {
-	    _classCallCheck(this, InstructionState);
-	
-	    return _possibleConstructorReturn(this, (InstructionState.__proto__ || Object.getPrototypeOf(InstructionState)).apply(this, arguments));
-	  }
-	
-	  _createClass(InstructionState, [{
-	    key: 'create',
-	    value: function create() {
-	      // Just to get us started
-	      this.stage.backgroundColor = '#182d3b';
-	      this.stateBg = this.add.image(0, 0, 'bg_instruction_screen');
-	      this.stateBg.width = this.game.width;
-	      this.stateBg.height = this.game.height;
-	
-	      this.totalTimeActive = 0;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      this.totalTimeActive += this.time.elapsed;
-	
-	      if (this.totalTimeActive > 5000) {
-	        this.splashComplete();
-	      }
-	    }
-	  }, {
-	    key: 'splashComplete',
-	    value: function splashComplete() {
-	      this.totalTimeActive = 0;
-	      this.state.start('MenuState', true, false);
-	    }
-	  }]);
-	
-	  return InstructionState;
-	}(Phaser.State);
-	
-	exports.default = InstructionState;
-
-/***/ },
-/* 25 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var QueenCrab = function (_Phaser$Sprite) {
-	  _inherits(QueenCrab, _Phaser$Sprite);
-	
-	  function QueenCrab(game, x, y) {
-	    _classCallCheck(this, QueenCrab);
-	
-	    //  Enable Arcade Physics for the sprite
-	    var _this = _possibleConstructorReturn(this, (QueenCrab.__proto__ || Object.getPrototypeOf(QueenCrab)).call(this, game, x, y, 'sprite_queen', 5));
-	
-	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-	
-	    // Setup animation
-	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
-	    _this.play('move');
-	
-	    _this.health = 8;
-	    return _this;
-	  }
-	
-	  return QueenCrab;
-	}(Phaser.Sprite);
-	
-	exports.default = QueenCrab;
 
 /***/ }
 /******/ ]);

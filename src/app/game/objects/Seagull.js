@@ -51,9 +51,10 @@ export default class Seagull extends Phaser.Sprite {
 
     if (this.target !== null) {
       let targetDistance = this.game.physics.arcade.distanceBetween(this, this.target);
-      console.log(targetDistance, this.targetLockedSfx.isPlaying);
-      if (targetDistance <= distanceRequired && this.targetLockedSfx.isPlaying === false) {
-        this.targetLockedSfx.loopFull(1);
+      if (targetDistance <= distanceRequired) {
+        if (this.targetLockedSfx.isPlaying === false) {
+          this.targetLockedSfx.loopFull(1);
+        }
       } else {
         this.targetLockedSfx.stop();
       }

@@ -46,6 +46,10 @@ export default class MenuState extends Phaser.State {
 
 
   switchState() {
+    if (!this.game.scale.isFullScreen && !this.game.IsDebug) {
+      this.game.scale.startFullScreen(false);
+    }
+
     this.hasFinished = true;
     this.menuSfx.stop();
     this.state.start('GamePlayState', true, false);

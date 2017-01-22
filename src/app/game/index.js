@@ -14,6 +14,9 @@ export default class Game extends Phaser.Game {
   constructor() {
     super(Constants.world.resolution.width, Constants.world.resolution.height, Phaser.CANVAS, 'game_canvas', null);
 
+    this.constants = Constants;
+    this.IsDebug = (this.getParameterByName('debug') === '1');
+
     this.state.add('BootState', BootState, false);
     this.state.add('LoadingState', LoadingState);
     this.state.add('SplashState', SplashState);
@@ -24,8 +27,16 @@ export default class Game extends Phaser.Game {
     this.state.add('VictoryState', VictoryState);
 
     this.state.start('BootState', true, false);
-
-    this.constants = Constants;
   }
+
+  getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
 
 }

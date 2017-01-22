@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { getRandomInt } from '../helpers';
 import HordeController from '../objects/HordeController';
+import QueenCrab from '../objects/QueenCrab';
 import EnemyCrab from '../objects/EnemyCrab';
 import Wave from '../objects/Wave';
 import Pickup from '../objects/Pickup';
@@ -37,9 +38,20 @@ export default class GamePlayState extends Phaser.State {
     this.backgroundMusic.onDecoded.add(() => {
       setTimeout(() => {
         this.backgroundMusic.loopFull(0);
-        this.backgroundMusic.fadeTo(4000, 0.4);
+        this.backgroundMusic.fadeTo(4000, 0.2);
       }, 3000);
     }, this);
+
+    this.backgroundWaveMusic = this.game.add.audio('AMB_waves');
+    this.backgroundWaveMusic.onDecoded.add(() => {
+      setTimeout(() => {
+        this.backgroundWaveMusic.loopFull(0);
+        this.backgroundWaveMusic.fadeTo(4000, 0.4);
+      }, 3000);
+    }, this);
+
+    this.transitionMusic = this.game.add.audio('trans_wave');
+    this.combatMusic = this.game.add.audio('state_combat_music');
 
 
     // Text
@@ -49,8 +61,13 @@ export default class GamePlayState extends Phaser.State {
     };
 
     // Health and kills
-    this.healthText = this.game.add.text(0, 0, 'Health: 0', style);
-    this.killText = this.game.add.text(0, 30, 'Kills: 0', style);
+    this.healthText = this.game.add.text(10, 10, 'Health: 0', style);
+    this.healthText.fixedToCamera = true;
+    this.healthText.cameraOffset.setTo(10, 10);
+
+    this.killText = this.game.add.text(10, 50, 'Kills: 0', style);
+    this.killText.fixedToCamera = true;
+    this.killText.cameraOffset.setTo(10, 50);
 
 
     // Sprite ordering
@@ -66,28 +83,39 @@ export default class GamePlayState extends Phaser.State {
       // Horde controller and members appear under water but above pickups
       this.game.world.sendToBack(hordeController.members);
     });
+    this.game.world.sendToBack(this.queenCrabGroup);
+    this.game.world.sendToBack(this.enemyCrabGroup);
 
     this.game.world.sendToBack(this.pickups);
     this.game.world.sendToBack(this.bgLayer1);        // Algae
     this.game.world.sendToBack(this.bgLayer0);        // Sand and road
 
+    // States
+    this.inCombat = false;
 
-    // Game states for audio
-    this.states = {
-    };
+
+    //
+    // Try and unbind previous keys from menu
+    this.game.input.onTap.add(() => {}, this);
+    this.game.input.keyboard.onPressCallback = null;
   }
 
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
-    // this.hordeController = new HordeController(this.game, 8000, 400, 'sprite_hermy');
-    this.hordeController = new HordeController(this.game, 4600, 400, 'sprite_hermy');
+    this.hordeController = new HordeController(this.game);
     this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
     // Setup seagulls
     this.seagullGroup = this.add.group();
     this.seagullGroup.add(new Seagull(this.game, 8000, 20, this.hordeController));
+
+
+    // Setup queen crab
+    this.queenCrabGroup = this.add.physicsGroup();
+    this.queenCrabGroup.add(new QueenCrab(this.game, 20, 500));
+
 
     // Setup enemy crab
     this.enemyCrabGroup = this.add.physicsGroup();
@@ -121,15 +149,19 @@ export default class GamePlayState extends Phaser.State {
         modifier: 'moveSpeed',
         value: 5,
         duration: 5000,
-        asset: 'sprite_pickup_shelly',
-        scale: 0.3,
+        spawnRate: 15000,
+        spawnArea: [4480, 0, 7580, 1755],
+        asset: 'sprite_pickup_coffee',
+        scale: 0.2,
       },
       {
         id: 1,
-        ident: 'rubbish',
-        modifier: 'moveSpeed',
-        value: -2,
-        duration: 3000,
+        ident: 'shelly',
+        modifier: 'members',
+        value: 1,
+        duration: 0,
+        spawnRate: 10000,
+        spawnArea: [0, 0, 3890, 1755],
         asset: 'sprite_pickup_shelly',
         scale: 0.3,
       },
@@ -137,6 +169,10 @@ export default class GamePlayState extends Phaser.State {
   }
 
   update() {
+    if (this.hasWon) {
+      return;
+    }
+
     // Check if horde controller is dead
     if (this.hordeController.isDead === true) {
       this.backgroundMusic.stop();
@@ -167,6 +203,35 @@ export default class GamePlayState extends Phaser.State {
 
 
     //
+    // Player colliding with queen crab
+    this.queenCrabGroup.forEach((queenCrab) => {
+      const queenCrabBound = queenCrab.getBounds();
+      const hordeBounds = this.hordeController.getBounds();
+
+      // Does this seagull overlap with the horde controller
+      const hordeCrabCollision = Phaser.Rectangle.intersects(queenCrabBound, hordeBounds);
+      if (hordeCrabCollision) {
+        if (this.hordeController.getHealth() > queenCrab.health) {
+          // Win
+          this.hasWon = true;
+
+          this.menuWaveSfx.fadeOut(0.5);
+          this.backgroundMusic.fadeOut(0.5);
+          this.backgroundWaveMusic.fadeOut(0.5);
+          this.transitionMusic.fadeOut(0.5);
+          this.combatMusic.fadeOut(0.5);
+          setTimeout(() => {
+            this.state.start('VictoryState', true, false);
+          }, 500);
+        } else {
+          // Sent back and lose some crabs
+          this.hordeController.queenFail();
+          console.log('sending back and losing crabs');
+        }
+      }
+    });
+
+    //
     // Player colliding with large crab
     this.enemyCrabGroup.forEach((bigCrab) => {
       const bigCrabBound = bigCrab.getBounds();
@@ -176,6 +241,7 @@ export default class GamePlayState extends Phaser.State {
       const hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
       if (hordeCrabCollision && !bigCrab.isDead) {
         // Battle
+        this.triggerCombat();
         bigCrab.attackTarget = this.hordeController;
         this.hordeController.attackTarget = bigCrab;
       } else {
@@ -216,6 +282,28 @@ export default class GamePlayState extends Phaser.State {
     // Update GUI text
     this.healthText.text = `Health: ${this.hordeController.getHealth()}`;
     this.killText.text = `Kills: ${this.hordeController.killCount}`;
+  }
+
+  triggerCombat() {
+    if (this.inCombat) {
+      return;
+    } else {
+      this.inCombat = true;
+
+      // Fade out normal music
+      this.backgroundMusic.fadeOut(0.5);
+
+      // Fade in transition
+      this.transitionMusic.fadeIn(0.5);
+
+      // Start combat after one second
+      console.log('combat music playing in 5 seconds');
+      setTimeout(() => {
+        console.log('combat music playing');
+        this.combatMusic.loopFull(0);
+      }, 5000);
+
+    }
   }
 
   cleanup() {
@@ -277,7 +365,10 @@ export default class GamePlayState extends Phaser.State {
       const pickupIndex = _.findIndex(this.pickupDefinitions, o => o.id === pickupIdent);
       const generatedPickup = this.pickupDefinitions[pickupIndex];
 
-      this.pickups.add(new Pickup(this.game, 4600, 200, generatedPickup));
+      //spawnArea: [0, 0, 3890, 1755],
+      const posX = 4600;
+      const posY = 200;
+      this.pickups.add(new Pickup(this.game, posX, posY, generatedPickup));
       this.pickupTimer = 0.0;
     }
 

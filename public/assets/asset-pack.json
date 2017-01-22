@@ -7,6 +7,7 @@
       "overwrite": false
     }
   ],
+
   "instructionScreen": [
     {
       "type": "image",
@@ -15,9 +16,6 @@
       "overwrite": false
     }
   ],
-
-
-
 
   "menuScreen": [
     {
@@ -67,6 +65,15 @@
       "url": "./assets/gameplayScreen/sprites/sprite_pickup_shelly.png",
       "overwrite": false
     },
+
+    {
+      "type": "image",
+      "key": "sprite_pickup_coffee",
+      "url": "./assets/gameplayScreen/sprites/sprite_pickup_coffee.png",
+      "overwrite": false
+    },
+
+
     {
       "type": "image",
       "key": "sprite_seagull",
@@ -128,15 +135,44 @@
       "frameHeight": 512,
       "frameMax": 8
     },
+    {
+      "type": "spritesheet",
+      "key": "sprite_queen",
+      "url": "./assets/gameplayScreen/sprites/sprite_queen.png",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameMax": 8
+    },
 
     {
       "type": "audio",
       "key": "state_walking_music",
       "urls": ["./assets/audio/Music/state_walking_music.wav"],
       "autoDecode": true
+    },
+    {
+      "type": "audio",
+      "key": "AMB_waves",
+      "urls": ["./assets/audio/Ambience/AMB_waves.wav"],
+      "autoDecode": true
+    },
+
+
+
+
+    {
+      "type": "audio",
+      "key": "trans_wave",
+      "urls": ["./assets/audio/Transitions/trans_wave.wav"],
+      "autoDecode": true
+    },
+
+    {
+      "type": "audio",
+      "key": "state_combat_music",
+      "urls": ["./assets/audio/Music/state_crab_music.wav"],
+      "autoDecode": true
     }
-
-
   ],
 
   "gameoverScreen": [
@@ -166,6 +202,12 @@
       "key": "bg_victory_screen",
       "url": "./assets/victoryScreen/bg_victory_screen.png",
       "overwrite": false
+    },
+    {
+      "type": "audio",
+      "key": "state_victory_music",
+      "urls": ["./assets/audio/Music/state_victory_music.wav"],
+      "autoDecode": true
     }
   ],
 

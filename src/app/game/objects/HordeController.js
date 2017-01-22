@@ -1,12 +1,17 @@
-import { getRandomArbitrary } from '../helpers';
+import { getRandomInt, getRandomArbitrary } from '../helpers';
 import HordeMember from '../objects/HordeMember';
 
 export default class HordeController extends Phaser.Sprite {
 
-  constructor(game, x, y, asset) {
-    super(game, x, y, asset, 5);
+  constructor(game) {
+    const startX = 4200;
+    const startY = 877;
+
+    super(game, startX, startY, 'sprite_hermy', 5);
 
     // Phaser data
+    this.startX = startX;
+    this.startY = startY;
     this.scale.setTo(0.4, 0.4);
     this.game = game;
     this.anchor.setTo(0.5);
@@ -72,7 +77,9 @@ export default class HordeController extends Phaser.Sprite {
     for (iHorde; iHorde < count; iHorde += 1) {
       if (this.members.length > 0) {
         hasRemoved = true;
-        this.members.remove(this.members.getRandom(), true, false);
+        const removedMember = this.members.getRandom();
+        this.members.remove(removedMember, true);
+        removedMember.destroy();
       }
     }
 
@@ -80,12 +87,16 @@ export default class HordeController extends Phaser.Sprite {
   }
 
   applyPickup(pickup) {
-    if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
-      this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
-    }
+    if (pickup.attributes.ident == 'shelly') {
+      this.addToHorde(pickup.attributes.value);
+    } else {
+      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+        this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
+      }
 
-    // Kill the pickup after the time
-    setTimeout(() => this.destroyPickup(pickup), pickup.attributes.duration);
+      // Kill the pickup after the time
+      setTimeout(() => this.destroyPickup(pickup), pickup.attributes.duration);
+    }
   }
 
   destroyPickup(pickup) {
@@ -222,6 +233,7 @@ export default class HordeController extends Phaser.Sprite {
   updateAttack() {
     if (this.attackTarget !== null && this.attackTarget.isDead) {
       this.killCount += 1;
+      this.addToHorde(2);
       this.attackTarget = null;
     }
 
@@ -242,5 +254,13 @@ export default class HordeController extends Phaser.Sprite {
     this.attackRate = 3000;
     this.attackStrength = 1;
     this.attackTarget = null;
+  }
+
+  queenFail() {
+    const crabsLost = getRandomInt(0, this.members.length - 1);
+    this.removeFromHorde(crabsLost);
+
+    this.x = this.startX;
+    this.y = this.startY;
   }
 }

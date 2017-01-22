@@ -67,6 +67,8 @@
 	  value: true
 	});
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
 	var _BootState = __webpack_require__(2);
 	
 	var _BootState2 = _interopRequireDefault(_BootState);
@@ -119,6 +121,9 @@
 	
 	    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, _constants2.default.world.resolution.width, _constants2.default.world.resolution.height, Phaser.CANVAS, 'game_canvas', null));
 	
+	    _this.constants = _constants2.default;
+	    _this.IsDebug = _this.getParameterByName('debug') === '1';
+	
 	    _this.state.add('BootState', _BootState2.default, false);
 	    _this.state.add('LoadingState', _LoadingState2.default);
 	    _this.state.add('SplashState', _SplashState2.default);
@@ -129,10 +134,21 @@
 	    _this.state.add('VictoryState', _VictoryState2.default);
 	
 	    _this.state.start('BootState', true, false);
-	
-	    _this.constants = _constants2.default;
 	    return _this;
 	  }
+	
+	  _createClass(Game, [{
+	    key: 'getParameterByName',
+	    value: function getParameterByName(name, url) {
+	      if (!url) url = window.location.href;
+	      name = name.replace(/[\[\]]/g, "\\$&");
+	      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	          results = regex.exec(url);
+	      if (!results) return null;
+	      if (!results[2]) return '';
+	      return decodeURIComponent(results[2].replace(/\+/g, " "));
+	    }
+	  }]);
 	
 	  return Game;
 	}(Phaser.Game);
@@ -398,6 +414,10 @@
 	  }, {
 	    key: 'switchState',
 	    value: function switchState() {
+	      if (!this.game.scale.isFullScreen && !this.game.IsDebug) {
+	        this.game.scale.startFullScreen(false);
+	      }
+	
 	      this.hasFinished = true;
 	      this.menuSfx.stop();
 	      this.state.start('GamePlayState', true, false);
@@ -430,6 +450,10 @@
 	var _HordeController = __webpack_require__(10);
 	
 	var _HordeController2 = _interopRequireDefault(_HordeController);
+	
+	var _QueenCrab = __webpack_require__(25);
+	
+	var _QueenCrab2 = _interopRequireDefault(_QueenCrab);
 	
 	var _EnemyCrab = __webpack_require__(12);
 	
@@ -500,9 +524,20 @@
 	      this.backgroundMusic.onDecoded.add(function () {
 	        setTimeout(function () {
 	          _this2.backgroundMusic.loopFull(0);
-	          _this2.backgroundMusic.fadeTo(4000, 0.4);
+	          _this2.backgroundMusic.fadeTo(4000, 0.2);
 	        }, 3000);
 	      }, this);
+	
+	      this.backgroundWaveMusic = this.game.add.audio('AMB_waves');
+	      this.backgroundWaveMusic.onDecoded.add(function () {
+	        setTimeout(function () {
+	          _this2.backgroundWaveMusic.loopFull(0);
+	          _this2.backgroundWaveMusic.fadeTo(4000, 0.4);
+	        }, 3000);
+	      }, this);
+	
+	      this.transitionMusic = this.game.add.audio('trans_wave');
+	      this.combatMusic = this.game.add.audio('state_combat_music');
 	
 	      // Text
 	      var style = {
@@ -511,8 +546,13 @@
 	      };
 	
 	      // Health and kills
-	      this.healthText = this.game.add.text(0, 0, 'Health: 0', style);
-	      this.killText = this.game.add.text(0, 30, 'Kills: 0', style);
+	      this.healthText = this.game.add.text(10, 10, 'Health: 0', style);
+	      this.healthText.fixedToCamera = true;
+	      this.healthText.cameraOffset.setTo(10, 10);
+	
+	      this.killText = this.game.add.text(10, 50, 'Kills: 0', style);
+	      this.killText.fixedToCamera = true;
+	      this.killText.cameraOffset.setTo(10, 50);
 	
 	      // Sprite ordering
 	      this.game.world.sendToBack(this.healthText);
@@ -527,28 +567,37 @@
 	        // Horde controller and members appear under water but above pickups
 	        _this2.game.world.sendToBack(hordeController.members);
 	      });
+	      this.game.world.sendToBack(this.queenCrabGroup);
+	      this.game.world.sendToBack(this.enemyCrabGroup);
 	
 	      this.game.world.sendToBack(this.pickups);
 	      this.game.world.sendToBack(this.bgLayer1); // Algae
 	      this.game.world.sendToBack(this.bgLayer0); // Sand and road
 	
+	      // States
+	      this.inCombat = false;
 	
-	      // Game states for audio
-	      this.states = {};
+	      //
+	      // Try and unbind previous keys from menu
+	      this.game.input.onTap.add(function () {}, this);
+	      this.game.input.keyboard.onPressCallback = null;
 	    }
 	  }, {
 	    key: 'generateWorld',
 	    value: function generateWorld() {
 	      // Setup the horde
 	      this.hordeControllers = this.add.physicsGroup();
-	      // this.hordeController = new HordeController(this.game, 8000, 400, 'sprite_hermy');
-	      this.hordeController = new _HordeController2.default(this.game, 4600, 400, 'sprite_hermy');
+	      this.hordeController = new _HordeController2.default(this.game);
 	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
 	      // Setup seagulls
 	      this.seagullGroup = this.add.group();
 	      this.seagullGroup.add(new _Seagull2.default(this.game, 8000, 20, this.hordeController));
+	
+	      // Setup queen crab
+	      this.queenCrabGroup = this.add.physicsGroup();
+	      this.queenCrabGroup.add(new _QueenCrab2.default(this.game, 20, 500));
 	
 	      // Setup enemy crab
 	      this.enemyCrabGroup = this.add.physicsGroup();
@@ -583,14 +632,18 @@
 	        modifier: 'moveSpeed',
 	        value: 5,
 	        duration: 5000,
-	        asset: 'sprite_pickup_shelly',
-	        scale: 0.3
+	        spawnRate: 15000,
+	        spawnArea: [4480, 0, 7580, 1755],
+	        asset: 'sprite_pickup_coffee',
+	        scale: 0.2
 	      }, {
 	        id: 1,
-	        ident: 'rubbish',
-	        modifier: 'moveSpeed',
-	        value: -2,
-	        duration: 3000,
+	        ident: 'shelly',
+	        modifier: 'members',
+	        value: 1,
+	        duration: 0,
+	        spawnRate: 10000,
+	        spawnArea: [0, 0, 3890, 1755],
 	        asset: 'sprite_pickup_shelly',
 	        scale: 0.3
 	      }];
@@ -599,6 +652,10 @@
 	    key: 'update',
 	    value: function update() {
 	      var _this3 = this;
+	
+	      if (this.hasWon) {
+	        return;
+	      }
 	
 	      // Check if horde controller is dead
 	      if (this.hordeController.isDead === true) {
@@ -628,6 +685,35 @@
 	      this.game.physics.arcade.collide(this.hordeControllers, this.umbrellaGroup, this.umbrellaCollision, null, this);
 	
 	      //
+	      // Player colliding with queen crab
+	      this.queenCrabGroup.forEach(function (queenCrab) {
+	        var queenCrabBound = queenCrab.getBounds();
+	        var hordeBounds = _this3.hordeController.getBounds();
+	
+	        // Does this seagull overlap with the horde controller
+	        var hordeCrabCollision = Phaser.Rectangle.intersects(queenCrabBound, hordeBounds);
+	        if (hordeCrabCollision) {
+	          if (_this3.hordeController.getHealth() > queenCrab.health) {
+	            // Win
+	            _this3.hasWon = true;
+	
+	            _this3.menuWaveSfx.fadeOut(0.5);
+	            _this3.backgroundMusic.fadeOut(0.5);
+	            _this3.backgroundWaveMusic.fadeOut(0.5);
+	            _this3.transitionMusic.fadeOut(0.5);
+	            _this3.combatMusic.fadeOut(0.5);
+	            setTimeout(function () {
+	              _this3.state.start('VictoryState', true, false);
+	            }, 500);
+	          } else {
+	            // Sent back and lose some crabs
+	            _this3.hordeController.queenFail();
+	            console.log('sending back and losing crabs');
+	          }
+	        }
+	      });
+	
+	      //
 	      // Player colliding with large crab
 	      this.enemyCrabGroup.forEach(function (bigCrab) {
 	        var bigCrabBound = bigCrab.getBounds();
@@ -637,6 +723,7 @@
 	        var hordeCrabCollision = Phaser.Rectangle.intersects(bigCrabBound, hordeBounds);
 	        if (hordeCrabCollision && !bigCrab.isDead) {
 	          // Battle
+	          _this3.triggerCombat();
 	          bigCrab.attackTarget = _this3.hordeController;
 	          _this3.hordeController.attackTarget = bigCrab;
 	        } else {
@@ -677,12 +764,36 @@
 	      this.killText.text = 'Kills: ' + this.hordeController.killCount;
 	    }
 	  }, {
-	    key: 'cleanup',
-	    value: function cleanup() {
+	    key: 'triggerCombat',
+	    value: function triggerCombat() {
 	      var _this4 = this;
 	
+	      if (this.inCombat) {
+	        return;
+	      } else {
+	        this.inCombat = true;
+	
+	        // Fade out normal music
+	        this.backgroundMusic.fadeOut(0.5);
+	
+	        // Fade in transition
+	        this.transitionMusic.fadeIn(0.5);
+	
+	        // Start combat after one second
+	        console.log('combat music playing in 5 seconds');
+	        setTimeout(function () {
+	          console.log('combat music playing');
+	          _this4.combatMusic.loopFull(0);
+	        }, 5000);
+	      }
+	    }
+	  }, {
+	    key: 'cleanup',
+	    value: function cleanup() {
+	      var _this5 = this;
+	
 	      this.seagullGroup.forEach(function (seagull) {
-	        if (seagull.x >= _this4.game.constants.world.bounds.width || seagull.y >= _this4.game.constants.world.bounds.height) {
+	        if (seagull.x >= _this5.game.constants.world.bounds.width || seagull.y >= _this5.game.constants.world.bounds.height) {
 	          seagull.destroy();
 	        }
 	      });
@@ -740,18 +851,21 @@
 	  }, {
 	    key: 'spawnPickups',
 	    value: function spawnPickups() {
-	      var _this5 = this;
+	      var _this6 = this;
 	
 	      if (this.pickupTimer >= this.pickupTimeBetween) {
 	        (function () {
-	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this5.pickupDefinitions.length - 1);
-	          var pickupIndex = _lodash2.default.findIndex(_this5.pickupDefinitions, function (o) {
+	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this6.pickupDefinitions.length - 1);
+	          var pickupIndex = _lodash2.default.findIndex(_this6.pickupDefinitions, function (o) {
 	            return o.id === pickupIdent;
 	          });
-	          var generatedPickup = _this5.pickupDefinitions[pickupIndex];
+	          var generatedPickup = _this6.pickupDefinitions[pickupIndex];
 	
-	          _this5.pickups.add(new _Pickup2.default(_this5.game, 4600, 200, generatedPickup));
-	          _this5.pickupTimer = 0.0;
+	          //spawnArea: [0, 0, 3890, 1755],
+	          var posX = 4600;
+	          var posY = 200;
+	          _this6.pickups.add(new _Pickup2.default(_this6.game, posX, posY, generatedPickup));
+	          _this6.pickupTimer = 0.0;
 	        })();
 	      }
 	
@@ -17958,12 +18072,17 @@
 	var HordeController = function (_Phaser$Sprite) {
 	  _inherits(HordeController, _Phaser$Sprite);
 	
-	  function HordeController(game, x, y, asset) {
+	  function HordeController(game) {
 	    _classCallCheck(this, HordeController);
 	
-	    // Phaser data
-	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, x, y, asset, 5));
+	    var startX = 4200;
+	    var startY = 877;
 	
+	    // Phaser data
+	    var _this = _possibleConstructorReturn(this, (HordeController.__proto__ || Object.getPrototypeOf(HordeController)).call(this, game, startX, startY, 'sprite_hermy', 5));
+	
+	    _this.startX = startX;
+	    _this.startY = startY;
 	    _this.scale.setTo(0.4, 0.4);
 	    _this.game = game;
 	    _this.anchor.setTo(0.5);
@@ -18029,7 +18148,9 @@
 	      for (iHorde; iHorde < count; iHorde += 1) {
 	        if (this.members.length > 0) {
 	          hasRemoved = true;
-	          this.members.remove(this.members.getRandom(), true, false);
+	          var removedMember = this.members.getRandom();
+	          this.members.remove(removedMember, true);
+	          removedMember.destroy();
 	        }
 	      }
 	
@@ -18040,14 +18161,18 @@
 	    value: function applyPickup(pickup) {
 	      var _this2 = this;
 	
-	      if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
-	        this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
-	      }
+	      if (pickup.attributes.ident == 'shelly') {
+	        this.addToHorde(pickup.attributes.value);
+	      } else {
+	        if (Object.prototype.hasOwnProperty.call(this.modifiers, pickup.attributes.modifier)) {
+	          this.modifiers[pickup.attributes.modifier] += pickup.attributes.value;
+	        }
 	
-	      // Kill the pickup after the time
-	      setTimeout(function () {
-	        return _this2.destroyPickup(pickup);
-	      }, pickup.attributes.duration);
+	        // Kill the pickup after the time
+	        setTimeout(function () {
+	          return _this2.destroyPickup(pickup);
+	        }, pickup.attributes.duration);
+	      }
 	    }
 	  }, {
 	    key: 'destroyPickup',
@@ -18178,6 +18303,7 @@
 	    value: function updateAttack() {
 	      if (this.attackTarget !== null && this.attackTarget.isDead) {
 	        this.killCount += 1;
+	        this.addToHorde(2);
 	        this.attackTarget = null;
 	      }
 	
@@ -18199,6 +18325,15 @@
 	      this.attackRate = 3000;
 	      this.attackStrength = 1;
 	      this.attackTarget = null;
+	    }
+	  }, {
+	    key: 'queenFail',
+	    value: function queenFail() {
+	      var crabsLost = (0, _helpers.getRandomInt)(0, this.members.length - 1);
+	      this.removeFromHorde(crabsLost);
+	
+	      this.x = this.startX;
+	      this.y = this.startY;
 	    }
 	  }]);
 	
@@ -18696,11 +18831,13 @@
 	      this.stateBg.height = this.game.height;
 	
 	      // Audio
-	      this.deadSfx = this.game.add.audio('state_dead_music');
-	      this.deadSfx.play();
-	      this.deadSfx.onStop.add(function () {
-	        _this2.game.state.start('SplashState', true, false);
-	      }, this);
+	      setTimeout(function () {
+	        _this2.deadSfx = _this2.game.add.audio('state_dead_music');
+	        _this2.deadSfx.play();
+	        _this2.deadSfx.onStop.add(function () {
+	          _this2.game.state.start('SplashState', true, false);
+	        }, _this2);
+	      }, 400);
 	    }
 	  }]);
 	
@@ -18739,12 +18876,22 @@
 	  _createClass(MenuState, [{
 	    key: 'create',
 	    value: function create() {
+	      var _this2 = this;
+	
 	      // Just to get us started
 	      this.stage.backgroundColor = '#182d3b';
 	
 	      this.stateBg = this.add.image(0, 0, 'bg_victory_screen');
 	      this.stateBg.width = this.game.width;
 	      this.stateBg.height = this.game.height;
+	
+	      setTimeout(function () {
+	        _this2.victorySfx = _this2.game.add.audio('state_victory_music');
+	        _this2.victorySfx.play();
+	        _this2.victorySfx.onStop.add(function () {
+	          _this2.game.state.start('SplashState', true, false);
+	        }, _this2);
+	      }, 300);
 	    }
 	  }]);
 	
@@ -19185,6 +19332,46 @@
 	}(Phaser.State);
 	
 	exports.default = InstructionState;
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var QueenCrab = function (_Phaser$Sprite) {
+	  _inherits(QueenCrab, _Phaser$Sprite);
+	
+	  function QueenCrab(game, x, y) {
+	    _classCallCheck(this, QueenCrab);
+	
+	    //  Enable Arcade Physics for the sprite
+	    var _this = _possibleConstructorReturn(this, (QueenCrab.__proto__ || Object.getPrototypeOf(QueenCrab)).call(this, game, x, y, 'sprite_queen', 5));
+	
+	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	
+	    // Setup animation
+	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
+	    _this.play('move');
+	
+	    _this.health = 20;
+	    return _this;
+	  }
+	
+	  return QueenCrab;
+	}(Phaser.Sprite);
+	
+	exports.default = QueenCrab;
 
 /***/ }
 /******/ ]);

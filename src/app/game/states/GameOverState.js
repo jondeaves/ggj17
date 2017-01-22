@@ -7,10 +7,12 @@ export default class GameOverState extends Phaser.State {
     this.stateBg.height = this.game.height;
 
     // Audio
-    this.deadSfx = this.game.add.audio('state_dead_music');
-    this.deadSfx.play();
-    this.deadSfx.onStop.add(() => {
-      this.game.state.start('SplashState', true, false);
-    }, this);
+    setTimeout(() => {
+      this.deadSfx = this.game.add.audio('state_dead_music');
+      this.deadSfx.play();
+      this.deadSfx.onStop.add(() => {
+        this.game.state.start('SplashState', true, false);
+      }, this);
+    }, 400);
   }
 }

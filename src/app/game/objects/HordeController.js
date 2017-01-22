@@ -222,6 +222,11 @@ export default class HordeController extends Phaser.Sprite {
   }
 
   attacked(damage = 1) {
+    const attackSuccess = Math.random() < 0.5;
+    if (attackSuccess === false) {
+      return;
+    }
+
     const removeState = this.removeFromHorde(1);
     if (removeState === false) {
       // if false, assume we have no members left
@@ -233,6 +238,7 @@ export default class HordeController extends Phaser.Sprite {
   updateAttack() {
     if (this.attackTarget !== null && this.attackTarget.isDead) {
       this.killCount += 1;
+      console.log('adding more shells');
       this.addToHorde(2);
       this.attackTarget = null;
     }

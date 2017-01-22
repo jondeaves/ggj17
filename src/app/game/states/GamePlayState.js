@@ -98,13 +98,21 @@ export default class GamePlayState extends Phaser.State {
     // Try and unbind previous keys from menu
     this.game.input.onTap.add(() => {}, this);
     this.game.input.keyboard.onPressCallback = null;
+
+
+    this.crabSpawnArea = [0, 0, 3690, 1755];
+    this.lastCrabSpawn = 0;
+    this.crabSpawnRate = 30;
+
+    this.seagullSpawnArea = [4590, 0, 7580, 1755];
+    this.lastSeagullSpawn = 0;
+    this.seagullSpawnRate = 20;
   }
 
   generateWorld() {
     // Setup the horde
     this.hordeControllers = this.add.physicsGroup();
     this.hordeController = new HordeController(this.game);
-    this.hordeController.addToHorde(4);
     this.hordeControllers.add(this.hordeController);
 
     // Setup seagulls
@@ -119,7 +127,6 @@ export default class GamePlayState extends Phaser.State {
 
     // Setup enemy crab
     this.enemyCrabGroup = this.add.physicsGroup();
-    this.enemyCrabGroup.add(new EnemyCrab(this.game, 4800, 100));
 
     // Setup enemy crab
     this.umbrellaGroup = this.add.physicsGroup();
@@ -145,25 +152,40 @@ export default class GamePlayState extends Phaser.State {
     this.pickupDefinitions = [
       {
         id: 0,
-        ident: 'food',
+        ident: 'coffee',
         modifier: 'moveSpeed',
         value: 5,
         duration: 5000,
-        spawnRate: 15000,
+        spawnRate: 15,
         spawnArea: [4480, 0, 7580, 1755],
         asset: 'sprite_pickup_coffee',
         scale: 0.2,
+        lastSpawn: 0,
       },
+      {
+        id: 0,
+        ident: 'badcoffee',
+        modifier: 'moveSpeed',
+        value: -3,
+        duration: 3000,
+        spawnRate: 15,
+        spawnArea: [4480, 0, 7580, 1755],
+        asset: 'sprite_pickup_coffee_stale',
+        scale: 0.2,
+        lastSpawn: 0,
+      },
+
       {
         id: 1,
         ident: 'shelly',
         modifier: 'members',
         value: 1,
         duration: 0,
-        spawnRate: 10000,
+        spawnRate: 10,
         spawnArea: [0, 0, 3890, 1755],
         asset: 'sprite_pickup_shelly',
         scale: 0.3,
+        lastSpawn: 0,
       },
     ];
   }
@@ -184,6 +206,8 @@ export default class GamePlayState extends Phaser.State {
 
     // Update pickup spawns
     this.spawnPickups();
+    this.spawnCrabs();
+    this.spawnSeagulls();
 
     this.cleanup();
 
@@ -271,7 +295,7 @@ export default class GamePlayState extends Phaser.State {
       if (hordeSeagullCollision === true && umbrellaCollide === false) {
         seagull.setLastCollision(this.totalTimeActive);
 
-        if (seagull.canAttack && seagull.checkAttackChance()) {
+        if (seagull.canAttack) {
           seagull.canAttack = false;
           this.hordeController.attacked();
         }
@@ -327,6 +351,7 @@ export default class GamePlayState extends Phaser.State {
     }
     this.totalTimeActive += this.time.elapsed;
     this.game.totalTimeActive = this.totalTimeActive;
+    this.game.totalSecondsActive = parseInt(this.totalTimeActive / 1000);
   }
 
   pickupCollision(hordeController, pickup) {
@@ -359,20 +384,58 @@ export default class GamePlayState extends Phaser.State {
     }
   }
 
-  spawnPickups() {
-    if (this.pickupTimer >= this.pickupTimeBetween) {
-      const pickupIdent = getRandomInt(0, this.pickupDefinitions.length - 1);
-      const pickupIndex = _.findIndex(this.pickupDefinitions, o => o.id === pickupIdent);
-      const generatedPickup = this.pickupDefinitions[pickupIndex];
+  spawnCrabs() {
+    const canSpawn = (
+      this.game.totalSecondsActive !== this.lastCrabSpawn &&
+      (this.game.totalSecondsActive / this.crabSpawnRate) % 1 === 0
+    );
 
-      //spawnArea: [0, 0, 3890, 1755],
-      const posX = 4600;
-      const posY = 200;
-      this.pickups.add(new Pickup(this.game, posX, posY, generatedPickup));
-      this.pickupTimer = 0.0;
+    if (canSpawn || this.enemyCrabGroup.length === 0) {
+      this.lastCrabSpawn = this.game.totalSecondsActive;
+      //crabSpawnArea
+      console.log('spawning crab');
+
+      const posX = this.game.rnd.integerInRange(this.crabSpawnArea[0] + 50, this.crabSpawnArea[2] - 50);
+      const posY = this.game.rnd.integerInRange(this.crabSpawnArea[1] + 50, this.crabSpawnArea[3] - 50);
+
+      this.enemyCrabGroup.add(new EnemyCrab(this.game, posX, posY));
     }
+  }
 
-    this.pickupTimer += this.game.time.elapsed;
+  spawnSeagulls() {
+    const canSpawn = (
+      this.game.totalSecondsActive !== this.lastSeagullSpawn &&
+      (this.game.totalSecondsActive / this.seagullSpawnRate) % 1 === 0
+    );
+
+    if (canSpawn || this.seagullGroup.length === 0) {
+      this.lastSeagullSpawn = this.game.totalSecondsActive;
+      console.log('spawning seagull');
+
+      const posX = this.game.rnd.integerInRange(this.seagullSpawnArea[0] + 50, this.seagullSpawnArea[2] - 50);
+      const posY = this.game.rnd.integerInRange(this.seagullSpawnArea[1] + 50, this.seagullSpawnArea[3] - 50);
+
+      this.seagullGroup.add(new Seagull(this.game, posX, posY, this.hordeController));
+    }
+  }
+
+  spawnPickups() {
+    this.pickupDefinitions.forEach((pickup) => {
+
+      const canSpawn = (
+        this.game.totalSecondsActive !== pickup.lastSpawn &&
+        (this.game.totalSecondsActive / pickup.spawnRate) % 1 === 0
+      );
+
+      if (canSpawn) {
+        pickup.lastSpawn = this.game.totalSecondsActive;
+
+        const posX = this.game.rnd.integerInRange(pickup.spawnArea[0] + 50, pickup.spawnArea[2] - 50);
+        const posY = this.game.rnd.integerInRange(pickup.spawnArea[1] + 50, pickup.spawnArea[3] - 50);
+
+        this.pickups.add(new Pickup(this.game, posX, posY, pickup));
+      }
+    });
   }
 
 }

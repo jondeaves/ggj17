@@ -10,6 +10,6 @@ export default class QueenCrab extends Phaser.Sprite {
     this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
     this.play('move');
 
-    this.health = 20;
+    this.health = 8;
   }
 }

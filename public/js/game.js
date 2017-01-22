@@ -270,8 +270,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      this.state.start('SplashState', true, false);
-	      // this.state.start('GamePlayState', true, false);
+	      // this.state.start('SplashState', true, false);
+	      this.state.start('GamePlayState', true, false);
 	      // this.state.start('VictoryState', true, false);
 	      // this.state.start('GameOverState', true, false);
 	    }
@@ -581,6 +581,14 @@
 	      // Try and unbind previous keys from menu
 	      this.game.input.onTap.add(function () {}, this);
 	      this.game.input.keyboard.onPressCallback = null;
+	
+	      this.crabSpawnArea = [0, 0, 3690, 1755];
+	      this.lastCrabSpawn = 0;
+	      this.crabSpawnRate = 30;
+	
+	      this.seagullSpawnArea = [4590, 0, 7580, 1755];
+	      this.lastSeagullSpawn = 0;
+	      this.seagullSpawnRate = 20;
 	    }
 	  }, {
 	    key: 'generateWorld',
@@ -588,7 +596,6 @@
 	      // Setup the horde
 	      this.hordeControllers = this.add.physicsGroup();
 	      this.hordeController = new _HordeController2.default(this.game);
-	      this.hordeController.addToHorde(4);
 	      this.hordeControllers.add(this.hordeController);
 	
 	      // Setup seagulls
@@ -601,7 +608,6 @@
 	
 	      // Setup enemy crab
 	      this.enemyCrabGroup = this.add.physicsGroup();
-	      this.enemyCrabGroup.add(new _EnemyCrab2.default(this.game, 4800, 100));
 	
 	      // Setup enemy crab
 	      this.umbrellaGroup = this.add.physicsGroup();
@@ -628,24 +634,37 @@
 	
 	      this.pickupDefinitions = [{
 	        id: 0,
-	        ident: 'food',
+	        ident: 'coffee',
 	        modifier: 'moveSpeed',
 	        value: 5,
 	        duration: 5000,
-	        spawnRate: 15000,
+	        spawnRate: 15,
 	        spawnArea: [4480, 0, 7580, 1755],
 	        asset: 'sprite_pickup_coffee',
-	        scale: 0.2
+	        scale: 0.2,
+	        lastSpawn: 0
+	      }, {
+	        id: 0,
+	        ident: 'badcoffee',
+	        modifier: 'moveSpeed',
+	        value: -3,
+	        duration: 3000,
+	        spawnRate: 15,
+	        spawnArea: [4480, 0, 7580, 1755],
+	        asset: 'sprite_pickup_coffee_stale',
+	        scale: 0.2,
+	        lastSpawn: 0
 	      }, {
 	        id: 1,
 	        ident: 'shelly',
 	        modifier: 'members',
 	        value: 1,
 	        duration: 0,
-	        spawnRate: 10000,
+	        spawnRate: 10,
 	        spawnArea: [0, 0, 3890, 1755],
 	        asset: 'sprite_pickup_shelly',
-	        scale: 0.3
+	        scale: 0.3,
+	        lastSpawn: 0
 	      }];
 	    }
 	  }, {
@@ -667,6 +686,8 @@
 	
 	      // Update pickup spawns
 	      this.spawnPickups();
+	      this.spawnCrabs();
+	      this.spawnSeagulls();
 	
 	      this.cleanup();
 	
@@ -752,7 +773,7 @@
 	        if (hordeSeagullCollision === true && umbrellaCollide === false) {
 	          seagull.setLastCollision(_this3.totalTimeActive);
 	
-	          if (seagull.canAttack && seagull.checkAttackChance()) {
+	          if (seagull.canAttack) {
 	            seagull.canAttack = false;
 	            _this3.hordeController.attacked();
 	          }
@@ -812,6 +833,7 @@
 	      }
 	      this.totalTimeActive += this.time.elapsed;
 	      this.game.totalTimeActive = this.totalTimeActive;
+	      this.game.totalSecondsActive = parseInt(this.totalTimeActive / 1000);
 	    }
 	  }, {
 	    key: 'pickupCollision',
@@ -849,27 +871,54 @@
 	      }
 	    }
 	  }, {
+	    key: 'spawnCrabs',
+	    value: function spawnCrabs() {
+	      var canSpawn = this.game.totalSecondsActive !== this.lastCrabSpawn && this.game.totalSecondsActive / this.crabSpawnRate % 1 === 0;
+	
+	      if (canSpawn || this.enemyCrabGroup.length === 0) {
+	        this.lastCrabSpawn = this.game.totalSecondsActive;
+	        //crabSpawnArea
+	        console.log('spawning crab');
+	
+	        var posX = this.game.rnd.integerInRange(this.crabSpawnArea[0] + 50, this.crabSpawnArea[2] - 50);
+	        var posY = this.game.rnd.integerInRange(this.crabSpawnArea[1] + 50, this.crabSpawnArea[3] - 50);
+	
+	        this.enemyCrabGroup.add(new _EnemyCrab2.default(this.game, posX, posY));
+	      }
+	    }
+	  }, {
+	    key: 'spawnSeagulls',
+	    value: function spawnSeagulls() {
+	      var canSpawn = this.game.totalSecondsActive !== this.lastSeagullSpawn && this.game.totalSecondsActive / this.seagullSpawnRate % 1 === 0;
+	
+	      if (canSpawn || this.seagullGroup.length === 0) {
+	        this.lastSeagullSpawn = this.game.totalSecondsActive;
+	        console.log('spawning seagull');
+	
+	        var posX = this.game.rnd.integerInRange(this.seagullSpawnArea[0] + 50, this.seagullSpawnArea[2] - 50);
+	        var posY = this.game.rnd.integerInRange(this.seagullSpawnArea[1] + 50, this.seagullSpawnArea[3] - 50);
+	
+	        this.seagullGroup.add(new _Seagull2.default(this.game, posX, posY, this.hordeController));
+	      }
+	    }
+	  }, {
 	    key: 'spawnPickups',
 	    value: function spawnPickups() {
 	      var _this6 = this;
 	
-	      if (this.pickupTimer >= this.pickupTimeBetween) {
-	        (function () {
-	          var pickupIdent = (0, _helpers.getRandomInt)(0, _this6.pickupDefinitions.length - 1);
-	          var pickupIndex = _lodash2.default.findIndex(_this6.pickupDefinitions, function (o) {
-	            return o.id === pickupIdent;
-	          });
-	          var generatedPickup = _this6.pickupDefinitions[pickupIndex];
+	      this.pickupDefinitions.forEach(function (pickup) {
 	
-	          //spawnArea: [0, 0, 3890, 1755],
-	          var posX = 4600;
-	          var posY = 200;
-	          _this6.pickups.add(new _Pickup2.default(_this6.game, posX, posY, generatedPickup));
-	          _this6.pickupTimer = 0.0;
-	        })();
-	      }
+	        var canSpawn = _this6.game.totalSecondsActive !== pickup.lastSpawn && _this6.game.totalSecondsActive / pickup.spawnRate % 1 === 0;
 	
-	      this.pickupTimer += this.game.time.elapsed;
+	        if (canSpawn) {
+	          pickup.lastSpawn = _this6.game.totalSecondsActive;
+	
+	          var posX = _this6.game.rnd.integerInRange(pickup.spawnArea[0] + 50, pickup.spawnArea[2] - 50);
+	          var posY = _this6.game.rnd.integerInRange(pickup.spawnArea[1] + 50, pickup.spawnArea[3] - 50);
+	
+	          _this6.pickups.add(new _Pickup2.default(_this6.game, posX, posY, pickup));
+	        }
+	      });
 	    }
 	  }]);
 	
@@ -18291,6 +18340,11 @@
 	    value: function attacked() {
 	      var damage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
+	      var attackSuccess = Math.random() < 0.5;
+	      if (attackSuccess === false) {
+	        return;
+	      }
+	
 	      var removeState = this.removeFromHorde(1);
 	      if (removeState === false) {
 	        // if false, assume we have no members left
@@ -18303,6 +18357,7 @@
 	    value: function updateAttack() {
 	      if (this.attackTarget !== null && this.attackTarget.isDead) {
 	        this.killCount += 1;
+	        console.log('adding more shells');
 	        this.addToHorde(2);
 	        this.attackTarget = null;
 	      }
@@ -18434,6 +18489,7 @@
 	    var _this = _possibleConstructorReturn(this, (EnemyCrab.__proto__ || Object.getPrototypeOf(EnemyCrab)).call(this, game, x, y, 'sprite_crab_enemy', 5));
 	
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    _this.scale.setTo(0.6, 0.6);
 	
 	    // Setup animation
 	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
@@ -18442,7 +18498,7 @@
 	    // Attack state
 	    _this.isDead = false;
 	    _this.modifiers = {
-	      health: 3
+	      health: 4
 	    };
 	    _this.resetAttack();
 	    return _this;
@@ -18728,11 +18784,6 @@
 	    key: 'updateHordeControllers',
 	    value: function updateHordeControllers(hordeControllers) {
 	      this.hordeControllers = hordeControllers;
-	    }
-	  }, {
-	    key: 'checkAttackChance',
-	    value: function checkAttackChance() {
-	      return Math.random() < 0.5 ? true : false;
 	    }
 	  }]);
 	
@@ -19364,7 +19415,7 @@
 	    _this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
 	    _this.play('move');
 	
-	    _this.health = 20;
+	    _this.health = 8;
 	    return _this;
 	  }
 	

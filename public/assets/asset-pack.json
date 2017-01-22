@@ -73,6 +73,15 @@
       "overwrite": false
     },
 
+    {
+      "type": "image",
+      "key": "sprite_pickup_coffee_stale",
+      "url": "./assets/gameplayScreen/sprites/sprite_pickup_coffee_stale.png",
+      "overwrite": false
+    },
+
+
+
 
     {
       "type": "image",

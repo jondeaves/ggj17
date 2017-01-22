@@ -72,8 +72,4 @@ export default class Seagull extends Phaser.Sprite {
   updateHordeControllers(hordeControllers) {
     this.hordeControllers = hordeControllers;
   }
-
-  checkAttackChance() {
-    return Math.random() < 0.5 ? true : false;
-  }
 }

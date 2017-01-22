@@ -5,6 +5,7 @@ export default class EnemyCrab extends Phaser.Sprite {
 
     //  Enable Arcade Physics for the sprite
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.scale.setTo(0.6, 0.6);
 
     // Setup animation
     this.animations.add('move', [0, 1, 2, 3, 4, 5, 6, 7], 8, true);
@@ -14,7 +15,7 @@ export default class EnemyCrab extends Phaser.Sprite {
     // Attack state
     this.isDead = false;
     this.modifiers = {
-      health: 3,
+      health: 4,
     };
     this.resetAttack();
   }

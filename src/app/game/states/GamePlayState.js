@@ -197,10 +197,12 @@ export default class GamePlayState extends Phaser.State {
   }
 
   waveCollision(hordeController, wave) {
-    if (wave.isMovingTowardLand) {
+    if (!wave.isResetting) {
+      wave.target = hordeController;
       hordeController.targetLocked = wave;
       hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y }
     } else {
+      wave.target = null;
       hordeController.targetLocked = false;
     }
   }

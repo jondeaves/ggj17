@@ -248,8 +248,8 @@
 	    key: 'loadComplete',
 	    value: function loadComplete() {
 	      this.text.setText('Load Complete');
-	      this.state.start('SplashState', true, false);
-	      // this.state.start('GamePlayState', true, false);
+	      // this.state.start('SplashState', true, false);
+	      this.state.start('GamePlayState', true, false);
 	      // this.state.start('VictoryState', true, false);
 	      // this.state.start('GameOverState', true, false);
 	    }
@@ -660,10 +660,12 @@
 	  }, {
 	    key: 'waveCollision',
 	    value: function waveCollision(hordeController, wave) {
-	      if (wave.isMovingTowardLand) {
+	      if (!wave.isResetting) {
+	        wave.target = hordeController;
 	        hordeController.targetLocked = wave;
 	        hordeController.targetLockedPreviousPos = { x: wave.x, y: wave.y };
 	      } else {
+	        wave.target = null;
 	        hordeController.targetLocked = false;
 	      }
 	    }
@@ -18246,6 +18248,7 @@
 	    var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, game, x, y, 'sprite_wave', 5));
 	
 	    _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+	    _this.body.setSize(660, 2316, 1340, 0);
 	
 	    // Setup animation
 	    _this.animationRef = null;
@@ -18260,6 +18263,7 @@
 	    _this.resetTimeout = null;
 	
 	    _this.menuWaveSfx = _this.game.add.audio('SFX_wave_triggered');
+	    _this.target = null;
 	    return _this;
 	  }
 	
@@ -18292,6 +18296,9 @@
 	      this.moveDistance += this.moveSpeed;
 	
 	      if (this.moveTimer >= this.moveTime) {
+	        if (this.target !== null) {
+	          this.target.targetLocked = false;
+	        }
 	        this.isResetting = true;
 	        this.animationRef = this.animations.play('move', 10, false);
 	      }

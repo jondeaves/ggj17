@@ -5,6 +5,7 @@ export default class Wave extends Phaser.Sprite {
 
     //  Enable Arcade Physics for the sprite
     this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.body.setSize(660, 2316, 1340, 0);
 
     // Setup animation
     this.animationRef = null;
@@ -19,6 +20,7 @@ export default class Wave extends Phaser.Sprite {
     this.resetTimeout = null;
 
     this.menuWaveSfx = this.game.add.audio('SFX_wave_triggered');
+    this.target = null;
   }
 
   update() {
@@ -47,6 +49,9 @@ export default class Wave extends Phaser.Sprite {
     this.moveDistance += this.moveSpeed;
 
     if (this.moveTimer >= this.moveTime) {
+      if (this.target !== null) {
+        this.target.targetLocked = false;
+      }
       this.isResetting = true;
       this.animationRef = this.animations.play('move', 10, false);
     }
